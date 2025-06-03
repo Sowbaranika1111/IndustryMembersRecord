@@ -1,29 +1,22 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Home from './pages/Home';
-import AddBatchmate from './components/AddBatchmate';
-import EditBatchmate from './components/EditBatchmate';
-import SearchBatchmate from './components/SearchBatchmate';
+import Search from './pages/Search';
+import Profile from './pages/Profile';
+import Navbar from './components/Navbar';
+import Add from './pages/Add'
+import './app.css'
 
-const App = () => {
+export default function App() {
   return (
-    <BrowserRouter>
-      <div>
-        <nav>
-          <Link to="/">Home</Link> |{' '}
-          <Link to="/add">Add</Link> |{' '}
-          <Link to="/search">Search</Link>
-        </nav>
-
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/add" element={<AddBatchmate />} />
-          <Route path="/edit/:id" element={<EditBatchmate />} />
-          <Route path="/search" element={<SearchBatchmate />} />
-        </Routes>
-      </div>
-    </BrowserRouter>
+    <Router>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path='/add' element={<Add />}/>
+      </Routes>
+    </Router>
   );
-};
-
-export default App;
+}
