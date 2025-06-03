@@ -2,7 +2,6 @@
 const Batchmate = require("../models/Batchmate.js");
 
 // Add new batchmate
-// Update in backend/controllers/batchmateController.js
 const { appendToExcel } = require("../utils/excelHandler");
 
 exports.addBatchmate = async (req, res) => {
@@ -31,6 +30,8 @@ exports.addBatchmate = async (req, res) => {
   }
 };
 
+// !===============================================================
+
 // Get all batchmates
 exports.getAllBatchmates = async (req, res) => {
   try {
@@ -41,6 +42,7 @@ exports.getAllBatchmates = async (req, res) => {
   }
 };
 
+// !===============================================================
 // Search by name
 exports.searchBatchmateByName = async (req, res) => {
   try {
