@@ -18,6 +18,6 @@ router.get('/', getAllBatchmates);
 router.get('/search', searchBatchmateByName);
 
 // Edit
-router.put('/:id', updateBatchmate);
+router.put('/:name', updateBatchmate);
 
 module.exports = router;
