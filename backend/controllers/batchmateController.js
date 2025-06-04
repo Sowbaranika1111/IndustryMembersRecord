@@ -42,6 +42,19 @@ exports.getAllBatchmates = async (req, res) => {
   }
 };
 
+// Get batchmate by ID
+exports.getBatchmateById = async (req, res) => {
+  try {
+    const batchmate = await Batchmate.findById(req.params.id);
+    if (!batchmate) {
+      return res.status(404).json({ message: 'Batchmate not found' });
+    }
+    res.json(batchmate);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 exports.searchBatchmateByName = async (req, res) => {
   try {
     const { name } = req.query;
