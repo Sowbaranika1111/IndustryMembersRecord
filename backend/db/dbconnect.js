@@ -1,14 +1,13 @@
-// db/dbconnect.js
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const dburl = "mongodb://127.0.0.1:27017/teammates_records";
+const PORT = process.env.PORT || 5000;
 
-mongoose.connect(dburl, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose
+  .connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
-    console.log("Successfully connected to MongoDB");
+    console.log('MongoDB connected successfully to:', process.env.MONGO_URI);
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
-  .catch((e) => {
-    console.log("Error in connecting to db:", e);
-  });
+  .catch(err => console.error('MongoDB connection error:', err));
 
-module.exports = mongoose;
+  module.exports = mongoose;
