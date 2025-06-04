@@ -42,8 +42,6 @@ exports.getAllBatchmates = async (req, res) => {
   }
 };
 
-// !===============================================================
-// Search by name
 exports.searchBatchmateByName = async (req, res) => {
   try {
     const { name } = req.query;
