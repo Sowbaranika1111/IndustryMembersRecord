@@ -4,8 +4,8 @@ import Home from './pages/Home';
 import Search from './pages/Search';
 import Profile from './pages/Profile';
 import Navbar from './components/Navbar';
-import Add from './pages/Add'
-import './app.css'
+import Add from './pages/Add';
+import './app.css';
 
 export default function App() {
   return (
@@ -14,8 +14,9 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path='/add' element={<Add />}/>
+        {/* Change this line: */}
+        <Route path="/profile/:batchmateId" element={<Profile />} /> 
+        <Route path="/add" element={<Add />} />
       </Routes>
     </Router>
   );
