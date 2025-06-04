@@ -6,6 +6,7 @@ const {
   getAllBatchmates,
   searchBatchmateByName,
   updateBatchmate,
+  getBatchmateById
 } = require('../controllers/batchmateController');
 
 // Add new
@@ -19,5 +20,8 @@ router.get('/search', searchBatchmateByName);
 
 // Edit
 router.put('/:name', updateBatchmate);
+
+// get by id
+router.get('/id/:id', getBatchmateById);  
 
 module.exports = router;
