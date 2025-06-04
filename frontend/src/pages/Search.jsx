@@ -41,7 +41,6 @@ export default function Search() {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [result, setResult] = useState(null);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('Type a name to search for batchmates.');
