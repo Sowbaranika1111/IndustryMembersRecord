@@ -93,25 +93,15 @@ exports.getBatchmateById = async (req, res) => {
 exports.searchBatchmateByName = async (req, res) => {
   try {
     const { name } = req.query;
-
     if (!name) {
-      return res
-        .status(400)
-        .json({ error: "Name query parameter is required" });
+      return res.status(400).json({ error: "Name query parameter is required" });
     }
-
-    // Partial match, case-insensitive
-    const regex = new RegExp(name, "i");
-
-    const results = await Batchmate.find({ name: regex }).lean();
-
-    if (!results || results.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No batchmates found with that name" });
+    const regex = new RegExp(`^${name}$`, "i");
+    const result = await Batchmate.findOne({ name: regex }).lean();
+    if (!result) {
+      return res.status(404).json({ message: "No batchmate found with that name" });
     }
-
-    res.status(200).json(results);
+    res.status(200).json(result);
   } catch (err) {
     console.error("Error in searchBatchmateByName:", err);
     res.status(500).json({ error: "Server error: " + err.message });
