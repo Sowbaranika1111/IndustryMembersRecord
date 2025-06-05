@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom'; // 1. Import useNavigate
+import { useNavigate } from 'react-router-dom';
 
 const API_BASE_URL = 'http://localhost:5000';
 
@@ -14,14 +14,13 @@ const cardStyle = {
   transition: 'transform 0.3s ease, box-shadow 0.3s ease',
   maxWidth: '400px',
   margin: '0 auto 16px',
-  cursor: 'pointer', // 2. Add cursor pointer to indicate clickability
+  cursor: 'pointer',
 };
 
-// 3. Modify ResultCard to accept id and onClick props
 const ResultCard = ({ id, name, email, onClick }) => (
   <div
     style={cardStyle}
-    onClick={() => onClick(id)} // Call onClick with the id
+    onClick={() => onClick(id)}
     onMouseEnter={(e) => {
       e.currentTarget.style.transform = 'translateY(-4px)';
       e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.15)';
@@ -37,7 +36,7 @@ const ResultCard = ({ id, name, email, onClick }) => (
 );
 
 export default function Search() {
-  const navigate = useNavigate(); // 4. Initialize useNavigate
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [result, setResult] = useState(null);
@@ -71,11 +70,10 @@ export default function Search() {
       setMessage('');
 
       try {
-        // Assuming backend uses findOne and returns single object or 404
         const response = await axios.get(
           `${API_BASE_URL}/api/batchmates/search?name=${encodeURIComponent(debouncedSearchTerm.trim())}`
         );
-        setResult(response.data); // response.data is a single object
+        setResult(response.data);
       } catch (err) {
         setResult(null);
         if (err.response) {
@@ -103,11 +101,9 @@ export default function Search() {
   const handleInputChange = (e) => {
     setSearchTerm(e.target.value);
   };
-
-  // 5. Define the click handler for the card
   const handleCardClick = (batchmateId) => {
     if (batchmateId) {
-      navigate(`/profile/${batchmateId}`); // Navigate to profile page with ID
+      navigate(`/profile/${batchmateId}`);
     }
   };
 
@@ -137,11 +133,10 @@ export default function Search() {
       {error && <p style={{ fontFamily: 'Segoe UI, sans-serif', color: 'red' }}>{error}</p>}
       
       {!loading && !error && result && (
-        // 6. Pass id and onClick handler to ResultCard
         <ResultCard
-          id={result._id} // Assuming your result object has an _id field
+          id={result._id}
           name={result.name}
-          email={result.emailAddress} // Mongoose schema uses emailAddress
+          email={result.email_address}
           onClick={handleCardClick}
         />
       )}

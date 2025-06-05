@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom'; // Added import for useParams
-import axios from 'axios'; // Added import for axios
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
 
 // Define API_BASE_URL (make sure this matches your backend's base URL)
 const API_BASE_URL = 'http://localhost:5000';
-
-// The initial static `data` object provided in your original code snippet is not
-// directly used for rendering if the API call is successful and profileData is set.
-// It primarily serves as a reference for the expected data structure.
 
 export default function Profile() {
     const { batchmateId } = useParams(); // Get batchmateId from URL parameters
@@ -26,7 +22,6 @@ export default function Profile() {
             setLoading(true);
             setError('');
             try {
-                // Updated API endpoint to match the pattern: /api/batchmates/id/:id
                 const response = await axios.get(`${API_BASE_URL}/api/batchmates/id/${batchmateId}`);
                 setProfileData(response.data);
             } catch (err) {
@@ -44,7 +39,7 @@ export default function Profile() {
         };
 
         fetchProfileData();
-    }, [batchmateId]); // Effect runs when batchmateId changes
+    }, [batchmateId]);
 
     if (loading) {
         return <div style={{ textAlign: 'center', padding: '50px', fontSize: '18px' }}>Loading profile...</div>;
@@ -57,14 +52,8 @@ export default function Profile() {
     if (!profileData) {
         return <div style={{ textAlign: 'center', padding: '50px', fontSize: '18px' }}>Profile data not available.</div>;
     }
-    
-    // Now, use profileData to render the UI.
-    // The JSX below assumes your API returns data with snake_case keys
-    // (e.g., job_profile, work_location) as indicated by the static `data` object
-    // you provided in the problem description.
-
     return (
-        <div style={{ padding: '20px', maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
             {/* Centered Avatar */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
                 <div style={{
@@ -106,12 +95,21 @@ export default function Profile() {
                 </p>
             </div>
 
-            {/* Two-column Details Section */}
-            <div style={{ display: 'flex', flexDirection: 'row', gap: '30px', marginTop: '30px', flexWrap: 'wrap' }}>
+
+            {/* Two-column Details Section in a Row */}
+            <div
+                style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: '30px',
+                    marginTop: '30px',
+                    flexWrap: 'nowrap',
+                    justifyContent: 'space-between'
+                }}
+            >
                 {/* Left Box */}
                 <div style={{
-                    flex: '1 1 400px',
-                    minWidth: '300px',
+                    width: '100%',
                     padding: '20px',
                     borderRadius: '10px',
                     backgroundColor: '#f9f9f9',
@@ -127,12 +125,19 @@ export default function Profile() {
                     <p><strong>Current Role:</strong> {profileData.current_role || 'N/A'}</p>
                     <p><strong>Industry Knowledge:</strong> {profileData.industry_knowledge || 'N/A'}</p>
                     <p><strong>Automation Skills:</strong> {profileData.automation_skills || 'N/A'}</p>
+                    <p><strong>DevOps Skills:</strong> {profileData.devops_skills || 'N/A'}</p>
+                    <p><strong>Cloud Knowledge:</strong> {profileData.cloud_knowledge || 'N/A'}</p>
+                    <p><strong>Agile Project Experience:</strong> {profileData.agile_project || 'N/A'}</p>
+                    <p><strong>PLM Development:</strong> {profileData.plm_development || 'N/A'}</p>
+                    <p><strong>PLM Testing:</strong> {profileData.plm_testing || 'N/A'}</p>
+                    <p><strong>PLM Support:</strong> {profileData.plm_support || 'N/A'}</p>
+                    <p><strong>PLM Admin:</strong> {profileData.plm_admin || 'N/A'}</p>
+                    <p><strong>PLM Upgrade:</strong> {profileData.plm_upgrade || 'N/A'}</p>
                 </div>
 
                 {/* Right Box */}
                 <div style={{
-                    flex: '1 1 400px',
-                    minWidth: '300px',
+                    width: '100%',
                     padding: '20px',
                     borderRadius: '10px',
                     backgroundColor: '#f9f9f9',
@@ -141,20 +146,18 @@ export default function Profile() {
                     fontSize: '16px',
                     fontFamily: '"Roboto Condensed", sans-serif'
                 }}>
-                    <p><strong>DevOps Skills:</strong> {profileData.devops_skills || 'N/A'}</p>
-                    <p><strong>Cloud Knowledge:</strong> {profileData.cloud_knowledge || 'N/A'}</p>
-                    <p><strong>Agile Project Experience:</strong> {profileData.agile_project || 'N/A'}</p>
-                    <p><strong>PLM Development Experience:</strong> {profileData.plm_development || 'N/A'}</p>
-                    {/*
-                      For certifications, the original static data object had:
-                      `external_certifications__completed_along_with_completion__expiry_date: ""`
-                      The original JSX had `data.externalCertifications?.completed`.
-                      This is an inconsistency. The code below assumes the API returns a field named
-                      `external_certifications__completed_along_with_completion__expiry_date` as a string.
-                      If your API returns this data differently (e.g., as an object like 
-                      `{ externalCertifications: { completed: "...", ... } }`),
-                      you'll need to adjust this line accordingly.
-                    */}
+                    <p><strong>PLM CAD Integration:</strong> {profileData.plm_cad_integration || 'N/A'}</p>
+                    <p><strong>PLM Interface Integration:</strong> {profileData.plm_interfaceintegration || 'N/A'}</p>
+                    <p><strong>PLM SAP Integration:</strong> {profileData.plm_sap_integration || 'N/A'}</p>
+                    <p><strong>TC Manufacturing:</strong> {profileData.tc_manufacturing || 'N/A'}</p>
+                    <p><strong>PLM-QMS Integration:</strong> {profileData.plmqms_integration || 'N/A'}</p>
+                    <p><strong>SW Engineering:</strong> {profileData.sw_engineering || 'N/A'}</p>
+                    <p><strong>Project Management:</strong> {profileData.project_management || 'N/A'}</p>
+                    <p><strong>PLM Functional:</strong> {profileData.plm_functional || 'N/A'}</p>
+                    <p><strong>PLM Migration:</strong> {profileData.plm_migration || 'N/A'}</p>
+                    <p><strong>PLM Product Configurators:</strong> {profileData.plm_product_configurators || 'N/A'}</p>
+                    <p><strong>AWC Customization:</strong> {profileData.active_workspace_customization || 'N/A'}</p>
+                    <p><strong>Teamcenter Module Experience:</strong> {profileData.teamcenter_module_experience || 'N/A'}</p>
                     <p><strong>Certifications:</strong> {profileData.external_certifications__completed_along_with_completion__expiry_date || 'N/A'}</p>
                     <p><strong>Certifications In Progress:</strong> {profileData.certifications_in_progress || 'N/A'}</p>
                     <p><strong>Special Call Out:</strong> {profileData.special_call_out || 'N/A'}</p>
