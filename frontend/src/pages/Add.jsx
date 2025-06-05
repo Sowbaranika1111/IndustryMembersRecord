@@ -45,15 +45,12 @@ const fieldLabels = {
 
 const dropdownOptions = {
     current_role: [
-        'Teamcenter Jr Developer', 'Teamcenter Sr Developer', 'Teamcenter SME', 'Polarion Developer', '.NET Developer', 'Java Developer',
-        'Oracle Agile PLM Developer', 'Oracle Agile PLM SME', 'AWS Developer', 'AWS SME', 'Azure Developer', 'Azure SME',
-        'GCP Developer', 'GCP SME', 'DevOps Developer', 'DevOps SME', 'Automation Developer', 'Others', 'Tester',
-        'Test lead', 'Teamcenter Admin', 'Teamcenter Support', 'Shift Lead', 'Service Lead', 'CAD Developer',
-        'CAD Designer', 'CAD SME', 'L1.5-Junior', 'L2-Working experience', 'L3 - Strong experience', 'Rulestream Developer',
-        'Rulestream SME', 'Delivery Lead', 'Project Manager'
+        'Teamcenter Jr Developer', 'Teamcenter Sr Developer', 'Teamcenter SME', 'Polarion Developer', '.NET Developer', 'Java Developer', 'Oracle Agile PLM Developer', 'Oracle Agile PLM SME', 'AWS Developer', 'AWS SME', 'Azure Developer', 'Azure SME',
+        'GCP Developer', 'GCP SME', 'DevOps Developer', 'DevOps SME', 'Automation Developer', 'Others', 'Tester', 'Test lead', 'Teamcenter Admin', 'Teamcenter Support', 'Shift Lead', 'Service Lead', 'CAD Developer',
+        'CAD Designer', 'CAD SME', 'L1.5-Junior', 'L2-Working experience', 'L3 - Strong experience', 'Rulestream Developer', 'Rulestream SME', 'Delivery Lead', 'Project Manager'
     ],
     industry_knowledge: [
-        'Automotive', 'Industrial', 'Aerospace', 'Medical Devices', 'Hitech', 'Resources', 'Consumer Goods', 'None', 'Several'
+       'Automotive', 'Industrial', 'Aerospace', 'Medical Devices', 'Hitech', 'Resources', 'Consumer Goods', 'None', 'Several'
     ],
     cloud_knowledge: [
         'Azure', 'AWS', 'GCP', 'multiple', 'All', 'None'
@@ -78,39 +75,39 @@ const dropdownOptions = {
 
 const frontendToBackendKeyMap = {
     name: 'name',
-    email_address: 'emailAddress',
-    management_level: 'managementLevel',
-    work_location: 'workLocation',
+    email_address: 'email_address',
+    management_level: 'management_level',
+    work_location: 'work_location',
     project: 'project',
-    job_profile: 'jobProfile',
-    current_role: 'currentRole',
-    overall_experience: 'overallExperience',
-    primary_skill: 'primarySkill',
-    additional_skills: 'additionalSkills',
-    agile_project: 'agileProject',
-    plm_development: 'plmDevelopment',
-    industry_knowledge: 'industryKnowledge',
-    automation_skills: 'automationSkills',
-    devops_skills: 'devOpsSkills',
-    cloud_knowledge: 'cloudKnowledge',
-    sw_engineering: 'softwareEngineering',
-    project_management: 'projectManagement',
-    plm_testing: 'plmTesting',
-    plm_support: 'plmSupport',
-    plm_admin: 'plmAdmin',
-    plm_upgrade: 'plmUpgrade',
-    plm_cad_integration: 'plmCadIntegration',
-    plm_interfaceintegration: 'plmInterfaceIntegration',
-    plm_sap_integration: 'plmSapIntegration',
-    tc_manufacturing: 'tcManufacturing',
-    plmqms_integration: 'plmQmsIntegration',
-    plm_functional: 'plmFunctional',
-    plm_migration: 'plmMigration',
-    plm_product_configurators: 'plmProductConfigurators',
-    active_workspace_customization: 'activeWorkspaceCustomization',
-    teamcenter_module_experience: 'teamcenterModuleExperience',
-    certifications_in_progress: 'certificationsInProgress',
-    special_call_out: 'specialCallOut'
+    job_profile: 'job_profile', 
+    current_role: 'current_role',
+    overall_experience: 'overall_experience',
+    primary_skill: 'primary_skill',
+    additional_skills: 'additional_skills',
+    agile_project: 'agile_project',
+    plm_development: 'plm_development',
+    industry_knowledge: 'industry_knowledge',
+    automation_skills: 'automation_skills',
+    devops_skills: 'devops_skills',
+    cloud_knowledge: 'cloud_knowledge',
+    sw_engineering: 'sw_engineering',
+    project_management: 'project_management',
+    plm_testing: 'plm_testing', 
+    plm_support: 'plm_support',
+    plm_admin: 'plm_admin',
+    plm_upgrade: 'plm_upgrade',
+    plm_cad_integration: 'plm_cad_integration',
+    plm_interfaceintegration: 'plm_interfaceintegration', 
+    plm_sap_integration: 'plm_sap_integration', 
+    tc_manufacturing: 'tc_manufacturing',
+    plmqms_integration: 'plmqms_integration',
+    plm_functional: 'plm_functional',
+    plm_migration: 'plm_migration',
+    plm_product_configurators: 'plm_product_configurators',
+    active_workspace_customization: 'active_workspace_customization',
+    teamcenter_module_experience: 'teamcenter_module_experience',
+    certifications_in_progress: 'certifications_in_progress',
+    special_call_out: 'special_call_out'
 };
 
 const transformDataForBackend = (frontendData) => {
@@ -120,16 +117,11 @@ const transformDataForBackend = (frontendData) => {
             const backendKey = frontendToBackendKeyMap[frontendKey];
             backendData[backendKey] = frontendData[frontendKey];
         } else if (frontendKey === 'external_certifications__completed_along_with_completion__expiry_date') {
-            backendData.externalCertifications = {
-                completed: frontendData[frontendKey] || '',
-                completionDate: '',
-                expiryDate: ''
-            };
+            backendData['external_certifications__completed_along_with_completion__expiry_date'] = frontendData[frontendKey] || '';
         }
     }
     return backendData;
-};
-
+}
 const AddPage = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
@@ -138,7 +130,7 @@ const AddPage = () => {
     );
     const [submitting, setSubmitting] = useState(false);
     const [submitStatus, setSubmitStatus] = useState({ message: '', type: '' });
-    const [stepChanging, setStepChanging] = useState(false); // New state for step transition
+    const [stepChanging, setStepChanging] = useState(false);
 
     const stepFields = {
         1: ['name', 'email_address', 'management_level', 'work_location', 'project', 'job_profile', 'current_role'],
@@ -146,12 +138,11 @@ const AddPage = () => {
         3: ['external_certifications__completed_along_with_completion__expiry_date', 'certifications_in_progress', 'special_call_out']
     };
 
-    // Effect to reset stepChanging after step has been updated and component re-rendered
     useEffect(() => {
         if (stepChanging) {
             setStepChanging(false);
         }
-    }, [step]); // Dependency on step ensures this runs after step update
+    }, [step]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -162,45 +153,43 @@ const AddPage = () => {
     };
 
     const handleNext = () => {
-        if (stepChanging) return; // Prevent action if already changing step
+        if (stepChanging) return;
 
         setSubmitStatus({ message: '', type: '' });
-        setStepChanging(true); // Indicate step change is starting
+        setStepChanging(true);
 
         if (step === 1) {
             const step1MandatoryKeys = ['name', 'email_address', 'management_level', 'work_location', 'project', 'job_profile'];
             for (const fieldKey of step1MandatoryKeys) {
                 if (!formData[fieldKey] || String(formData[fieldKey]).trim() === '') {
                     alert(`${fieldLabels[fieldKey]} is required to proceed to the next section.`);
-                    setStepChanging(false); // Reset if validation fails
+                    setStepChanging(false);
                     return;
                 }
             }
         } else if (step === 2) {
             if (!formData.primary_skill || String(formData.primary_skill).trim() === '') {
                 alert(`${fieldLabels.primary_skill} is required to proceed to the next section.`);
-                setStepChanging(false); // Reset if validation fails
+                setStepChanging(false);
                 return;
             }
         }
         setStep((prev) => prev + 1);
-        // setStepChanging(false) will be handled by useEffect after re-render
     };
 
     const handlePrev = () => {
-        if (stepChanging) return; // Prevent action if already changing step
+        if (stepChanging) return;
 
         if (step > 1) {
             setSubmitStatus({ message: '', type: '' });
-            setStepChanging(true); // Indicate step change is starting
+            setStepChanging(true);
             setStep((prev) => prev - 1);
-            // setStepChanging(false) will be handled by useEffect after re-render
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (stepChanging) return; // Prevent submission if step is changing
+        if (stepChanging) return;
 
         setSubmitting(true);
         setSubmitStatus({ message: '', type: '' });
@@ -223,7 +212,7 @@ const AddPage = () => {
                         break;
                     }
                 }
-                setStepChanging(true); // To disable buttons while step changes
+                setStepChanging(true);
                 setStep(errorStep);
                 return;
             }
@@ -235,7 +224,7 @@ const AddPage = () => {
             await axios.post(`${API_BASE_URL}/api/batchmates`, payload);
             alert('Batchmate added successfully! Click OK to return to the homepage.');
             setFormData(Object.keys(fieldLabels).reduce((acc, key) => ({ ...acc, [key]: '' }), {}));
-            setStepChanging(true); // To disable buttons while step changes to 1
+            setStepChanging(true);
             setStep(1);
             navigate('/');
         } catch (error) {
@@ -250,7 +239,6 @@ const AddPage = () => {
             setSubmitStatus({ message: errorMessage, type: 'error' });
         } finally {
             setSubmitting(false);
-            // stepChanging will be reset by useEffect if step changed, or should be false if submit failed without step change
         }
     };
 
@@ -263,7 +251,7 @@ const AddPage = () => {
                     value={formData[name]}
                     onChange={handleChange}
                     style={{ width: '99%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
-                    disabled={submitting || stepChanging} // Disable during submission or step change
+                    disabled={submitting || stepChanging}
                 >
                     <option value="">Select...</option>
                     {dropdownOptions[name].map((opt) => (
@@ -277,7 +265,7 @@ const AddPage = () => {
                     value={formData[name]}
                     onChange={handleChange}
                     style={{ width: '95%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
-                    disabled={submitting || stepChanging} // Disable during submission or step change
+                    disabled={submitting || stepChanging}
                 />
             )}
         </div>
@@ -363,7 +351,7 @@ const AddPage = () => {
                             style={{
                                 padding: '10px 20px', backgroundColor: accenturePurple,
                                 color: '#fff', border: 'none', borderRadius: '5px',
-                                cursor: 'pointer', marginLeft: step === 1 ? 'auto' : '' // This is fine, only applies if step === 1, but here step is 3, so it's effectively marginLeft: ''
+                                cursor: 'pointer', marginLeft: step === 1 ? 'auto' : ''
                             }}
                             disabled={submitting || stepChanging} // Disable during submission or step change
                         >
