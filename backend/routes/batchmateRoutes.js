@@ -6,7 +6,7 @@ const {
   getAllBatchmates,
   searchBatchmateByName,
   updateBatchmate,
-  getBatchmateById
+  getBatchmateById,
 } = require('../controllers/batchmateController');
 
 // Add new
