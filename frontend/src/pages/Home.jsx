@@ -50,7 +50,7 @@ export default function Home() {
             marginBottom: '20px',
             fontFamily: '"EB Garamond", serif'
           }}>
-            Welcome to Industry X Market
+            Welcome to IX Engineering
           </h1>
 
           <button

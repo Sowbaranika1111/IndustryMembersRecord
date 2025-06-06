@@ -96,7 +96,10 @@ exports.searchBatchmateByName = async (req, res) => {
     if (!name) {
       return res.status(400).json({ error: "Name query parameter is required" });
     }
-    const regex = new RegExp(`^${name}$`, "i");
+
+    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`^${escapedName}\\s*(\\(.*\\))?$`, "i");
+
     const result = await Batchmate.findOne({ name: regex }).lean();
     if (!result) {
       return res.status(404).json({ message: "No batchmate found with that name" });
