@@ -5,6 +5,7 @@ import Search from './pages/Search';
 import Profile from './pages/Profile';
 import Navbar from './components/Navbar';
 import Add from './pages/Add';
+import Login from './pages/Login';
 import './app.css';
 
 export default function App() {
@@ -12,10 +13,11 @@ export default function App() {
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/search" element={<Search />} />
         <Route path="/profile/:batchmateId" element={<Profile />} /> 
         <Route path="/add" element={<Add />} />
+        <Route path="/" element={< Login/>} />
       </Routes>
     </Router>
   );

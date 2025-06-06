@@ -50,10 +50,10 @@ const dropdownOptions = {
         'CAD Designer', 'CAD SME', 'L1.5-Junior', 'L2-Working experience', 'L3 - Strong experience', 'Rulestream Developer', 'Rulestream SME', 'Delivery Lead', 'Project Manager'
     ],
     industry_knowledge: [
-       'Automotive', 'Industrial', 'Aerospace', 'Medical Devices', 'Hitech', 'Resources', 'Consumer Goods', 'None', 'Several'
+       'Automotive', 'Industrial', 'Aerospace', 'Medical Devices', 'Hitech', 'Resources', 'Consumer Goods', 'None', 'Multiple'
     ],
     cloud_knowledge: [
-        'Azure', 'AWS', 'GCP', 'multiple', 'All', 'None'
+        'Azure', 'AWS', 'GCP', 'multiple'
     ],
     agile_project: ['<1', '1-2 yr', '2-5 yr', '5-8 yr', '8+ yr', 'Awareness', 'None'],
     plm_development: ['<1', '1-2 yr', '2-5 yr', '5-8 yr', '8+ yr', 'Awareness', 'None'],
