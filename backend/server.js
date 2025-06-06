@@ -29,3 +29,11 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+//!dropdown values from mongodb routes
+
+const currentRoleRoutes = require('./routes/currentRoleRoutes.js');
+const industryKnowledgeRoutes = require("./routes/industryKnowledgeRoutes.js");
+
+app.use('/api/current-role-dropdown/', currentRoleRoutes);
+app.use("/api/indus-know-dropdown/", industryKnowledgeRoutes);
