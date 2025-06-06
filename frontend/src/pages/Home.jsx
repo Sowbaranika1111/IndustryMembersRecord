@@ -83,7 +83,7 @@ export default function Home() {
             Industry X is Accenture’s digital transformation initiative focused on smart manufacturing,
             connected products, and the future of operations. We combine innovation, technology, and
             engineering to transform traditional industries and build more agile, efficient, and
-            sustainable operations.
+            sustainable operations...
           </p>
         </div>
 
