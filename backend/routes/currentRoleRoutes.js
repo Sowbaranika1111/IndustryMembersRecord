@@ -1,21 +1,26 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const {
-  getCurrentValuesByCategory,
+  getAllCurrentRoles,
   addNewCurrentRole,
   deleteCurrentRoleById,
-  insertAllCurrentRoles
-} = require('../controllers/dropDownValuesController/currentRoleController');
+  deleteAllCurrentRoles,
+  insertAllCurrentRoles,
+} = require("../controllers/dropDownValuesController/currentRoleController.js");
 
 // GET existing current_role values
-router.get('/current_role', getCurrentValuesByCategory);
+router.get("/", getAllCurrentRoles);
 
 // POST new current_role
-router.post('/current_role', addNewCurrentRole);
+router.post("/add", addNewCurrentRole);
 
 // DELETE current_role by ID
-router.delete('/current_role/:id', deleteCurrentRoleById);
+router.delete("/delete/:id", deleteCurrentRoleById);
+
+//DELETE all roles at a time
+router.delete("/deleteall", deleteAllCurrentRoles);
 
 // BULK insert roles
-// router.post('/current_role/bulk', insertAllCurrentRoles);
+router.post("/bulk-insert", insertAllCurrentRoles);
+
 module.exports = router;
