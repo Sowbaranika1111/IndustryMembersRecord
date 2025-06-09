@@ -1,44 +1,78 @@
 import React, { useState } from 'react';
-
-// For a real-world app, this SVG would likely be a separate file.
-// For this example, it's embedded as a component for simplicity.
-const AccentureLogo = () => (
-    <svg
-        className="accenture-logo"
-        viewBox="0 0 1024 1024"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="currentColor" // This allows the color to be set via CSS
-    >
-        <path d="M722.9 835.9H301.1L489.2 512 301.1 188.1h421.8L533.1 512z" />
-    </svg>
-);
+// Note: This component uses react-router-dom for navigation.
+// Ensure your app has it installed (`npm install react-router-dom`)
+// and this component is rendered within a <BrowserRouter>.
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-    const [enterpriseId, setEnterpriseId] = useState('');
-    const [password, setPassword] = useState('');
-    const [role, setRole] = useState('User');
+    // State for the multi-step flow ('enterId' or 'enterOtp')
+    const [step, setStep] = useState('enterId');
 
-    const handleSubmit = (event) => {
-        event.preventDefault(); 
-        console.log({
-            enterpriseId,
-            password,
-            role,
-        });
-        alert(`Login submitted for ${enterpriseId} with role ${role}`);
+    // State for form inputs
+    const [enterpriseId, setEnterpriseId] = useState('');
+    const [otp, setOtp] = useState('');
+
+    // State for logic and feedback
+    const [generatedOtp, setGeneratedOtp] = useState('');
+    const [error, setError] = useState('');
+
+    const navigate = useNavigate();
+
+    // Generates a 6-digit OTP and logs it for testing
+    const generateAndShowOtp = () => {
+        const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+        // For testing purposes, we log the OTP to the console.
+        // In a real application, this would be sent via SMS/email.
+        console.log(`Generated OTP for ${enterpriseId}: ${newOtp}`);
+        setGeneratedOtp(newOtp);
+    };
+
+    // Handles the submission of the Enterprise ID
+    const handleIdSubmit = (event) => {
+        event.preventDefault();
+        if (enterpriseId.trim() === '') {
+            setError('Enterprise ID cannot be empty.');
+            return;
+        }
+        setError('');
+        generateAndShowOtp();
+        setStep('enterOtp'); // Move to the next step
+    };
+
+    // Handles the verification of the OTP
+    const handleOtpSubmit = (event) => {
+        event.preventDefault();
+        if (otp === generatedOtp) {
+            setError('');
+            // On successful login, navigate to the home page
+            navigate('/home');
+        } else {
+            setError('OTP mismatched. Please try again.');
+            setOtp(''); // Clear OTP input on failure
+        }
+    };
+
+    const handleGoBack = () => {
+        setStep('enterId');
+        setError('');
+        setOtp('');
+        setEnterpriseId('');
     };
 
     return (
         <>
+            {/* --- STYLES --- */}
             <style>{`
         :root {
-        --accenture-purple: #A100FF;
-        --accenture-purple-dark: #8e00e6;
-        --text-dark: #212121;
-        --text-light: #5f5f5f;
-        --border-color: #dcdcdc;
-        --background-light: #f5f5f5;
-        --background-white: #ffffff;
+          --accenture-purple: #A100FF;
+          --accenture-purple-dark: #8e00e6;
+          --text-dark: #212121;
+          --text-light: #5f5f5f;
+          --text-link: #4a4a4a;
+          --border-color: #dcdcdc;
+          --background-light: #f5f5f5;
+          --background-white: #ffffff;
+          --error-color: #d32f2f;
         }
 
         .login-page-container {
@@ -56,42 +90,45 @@ const Login = () => {
           border-radius: 12px;
           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
           width: 100%;
-          max-width: 600px;
+          max-width: 450px; /* Adjusted max-width for a cleaner look */
           box-sizing: border-box;
         }
 
         .login-header {
-          display: grid;
-          grid-template-columns: auto 1fr;
-          align-items: center;
-          gap: 15px;
-          margin-bottom: 35px;
-          text-align: center;
-        }
+  display: flex;         /* Use Flexbox for simple alignment */
+  align-items: center;   /* Vertically align the logo and title */
+  gap: 15px;             /* The space between the logo and title */
+  margin-bottom: 35px;
+}
 
-        .logo-container {
-          color: var(--accenture-purple);
-          justify-self: start; /* Aligns the logo to the left */
-        }
+.logo-container {
+  /* No special styles needed, it's a flex item */
+  /* line-height: 0 helps prevent extra space if the image is inline */
+  line-height: 0; 
+}
 
-        .accenture-logo {
-          width: 45px;
-          height: 45px;
-        }
+.accenture-logo {
+  width: 45px;
+  height: 45px;
+}
 
-        .login-header h1 {
-          font-size: 1.8em;
-          color: var(--text-dark);
-          margin: 0;
-          font-weight: 600;
-          grid-column: 1 / span 2; /* Makes the title span both columns to center it */
-          justify-self: center; /* Ensures it's centered within the spanned columns */
-          padding-left: 45px; /* Offset to perfectly center, accounts for logo width */
-          box-sizing: border-box;
-        }
+/* The h1 is now a simple flex item next to the logo */
+.login-header h1 {
+  font-size: 1.8em;
+  color: var(--text-dark);
+  margin: 0;
+  font-weight: 600;
+  /* All the complex grid and padding properties are removed */
+}
 
         .form-group {
           margin-bottom: 25px;
+        }
+        
+        .form-group.otp-info {
+          margin-bottom: 15px;
+          color: var(--text-light);
+          font-size: 14px;
         }
 
         .form-group label {
@@ -102,7 +139,7 @@ const Login = () => {
           font-weight: 500;
         }
 
-        .form-input, .form-select {
+        .form-input {
           width: 100%;
           padding: 14px;
           font-size: 16px;
@@ -112,7 +149,7 @@ const Login = () => {
           transition: border-color 0.3s, box-shadow 0.3s;
         }
 
-        .form-input:focus, .form-select:focus {
+        .form-input:focus {
           outline: none;
           border-color: var(--accenture-purple);
           box-shadow: 0 0 0 3px rgba(161, 0, 255, 0.15);
@@ -135,61 +172,80 @@ const Login = () => {
         .submit-btn:hover {
           background-color: var(--accenture-purple-dark);
         }
+        
+        .error-message {
+            color: var(--error-color);
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .change-id-link {
+            font-size: 13px;
+            color: var(--text-link);
+            text-decoration: underline;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 5px;
+        }
       `}</style>
 
+            {/* --- COMPONENT JSX --- */}
             <div className="login-page-container">
                 <div className="login-container">
                     <div className="login-header">
-                        {/* <div className="logo-container">
-                            <AccentureLogo />
-                        </div> */}
+                        <div className="logo-container">
+                            <img src="/ACN.svg" alt="Logo" className="accenture-logo" />
+                        </div>
                         <h1>IX Engineering</h1>
                     </div>
 
-                    <form onSubmit={handleSubmit}>
-                        <div className="form-group">
-                            <label htmlFor="enterpriseId">Enterprise Mail ID</label>
-                            <input
-                                type="text"
-                                id="enterpriseId"
-                                className="form-input"
-                                value={enterpriseId}
-                                onChange={(e) => setEnterpriseId(e.target.value)}
-                                placeholder="e.g., s.bw.gunasekaran@accenture.com"
-                                required
-                            />
-                        </div>
+                    {step === 'enterId' ? (
+                        <form onSubmit={handleIdSubmit}>
+                            <div className="form-group">
+                                <label htmlFor="enterpriseId">Enterprise ID</label>
+                                <input
+                                    type="text"
+                                    id="enterpriseId"
+                                    className="form-input"
+                                    value={enterpriseId}
+                                    onChange={(e) => setEnterpriseId(e.target.value)}
+                                    placeholder="e.g., juile.sweet"
+                                    autoFocus
+                                />
+                            </div>
+                            {error && <p className="error-message">{error}</p>}
+                            <button type="submit" className="submit-btn">
+                                Next
+                            </button>
+                        </form>
+                    ) : (
+                        <form onSubmit={handleOtpSubmit}>
+                             <div className="form-group otp-info">
+                                An OTP has been sent to the registered device for <strong>{enterpriseId}</strong>.
+                                <span onClick={handleGoBack} className="change-id-link">Change ID</span>
+                            </div>
 
-                        <div className="form-group">
-                            <label htmlFor="password">Password</label>
-                            <input
-                                type="password"
-                                id="password"
-                                className="form-input"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                required
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label htmlFor="role">Role</label>
-                            <select
-                                id="role"
-                                className="form-select"
-                                value={role}
-                                onChange={(e) => setRole(e.target.value)}
-                            >
-                                <option value="User">User</option>
-                                <option value="Admin">Admin</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" className="submit-btn">
-                            Login
-                        </button>
-                    </form>
+                            <div className="form-group">
+                                <label htmlFor="otp">Enter 6-Digit OTP</label>
+                                <input
+                                    type="text"
+                                    id="otp"
+                                    className="form-input"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
+                                    placeholder="••••••"
+                                    maxLength="6"
+                                    pattern="[0-9]{6}"
+                                    autoFocus
+                                />
+                            </div>
+                            {error && <p className="error-message">{error}</p>}
+                            <button type="submit" className="submit-btn">
+                                Verify & Login
+                            </button>
+                        </form>
+                    )}
                 </div>
             </div>
         </>
