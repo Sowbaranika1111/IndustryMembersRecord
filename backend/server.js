@@ -24,6 +24,7 @@ app.get('/download/excel', (req, res) => {
   res.download(file);
 });
 
+
 // DB Connection and Server Start
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
@@ -34,6 +35,13 @@ app.listen(PORT, () => {
 
 const currentRoleRoutes = require('./routes/currentRoleRoutes.js');
 const industryKnowledgeRoutes = require("./routes/industryKnowledgeRoutes.js");
+const cloudKnowledgeRoutes = require('./routes/cloudKnowledgeRoutes');
+app.use('/api/cloud-knowledge-dropdown', cloudKnowledgeRoutes);
+
+
+   
+   
 
 app.use('/api/current-role-dropdown/', currentRoleRoutes);
 app.use("/api/indus-know-dropdown/", industryKnowledgeRoutes);
+
