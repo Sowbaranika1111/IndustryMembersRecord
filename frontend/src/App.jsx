@@ -11,7 +11,7 @@ import './app.css';
 export default function App() {
   return (
     <Router>
-      <Navbar />
+      
       <Routes>
         <Route path="/home" element={<Home />} />
         <Route path="/search" element={<Search />} />
