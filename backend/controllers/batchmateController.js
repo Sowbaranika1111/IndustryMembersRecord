@@ -90,26 +90,55 @@ exports.getBatchmateById = async (req, res) => {
   }
 };
 
+// exports.searchBatchmateByName = async (req, res) => {
+//   try {
+//     const { name } = req.query;
+//     if (!name) {
+//       return res.status(400).json({ error: "Name query parameter is required" });
+//     }
+
+//     const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+//     const regex = new RegExp(`^${escapedName}\\s*(\\(.*\\))?$`, "i");
+
+//     const result = await Batchmate.findOne({ name: regex }).lean();
+//     if (!result) {
+//       return res.status(404).json({ message: "No batchmate found with that name" });
+//     }
+//     res.status(200).json(result);
+//   } catch (err) {
+//     console.error("Error in searchBatchmateByName:", err);
+//     res.status(500).json({ error: "Server error: " + err.message });
+//   }
+// };
+
+
 exports.searchBatchmateByName = async (req, res) => {
   try {
     const { name } = req.query;
-    if (!name) {
+
+    if (!name || typeof name !== "string") {
       return res.status(400).json({ error: "Name query parameter is required" });
     }
 
-    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`^${escapedName}\\s*(\\(.*\\))?$`, "i");
+    const escapedInput = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(escapedInput, "i"); // Partial match, case-insensitive
 
-    const result = await Batchmate.findOne({ name: regex }).lean();
-    if (!result) {
-      return res.status(404).json({ message: "No batchmate found with that name" });
+    const results = await Batchmate.find({ name: regex })
+       .limit(12) // limit to 10 suggestions
+      .sort({ name: 1 }) // sort alphabetically
+      .lean();
+
+    if (!results || results.length === 0) {
+      return res.status(404).json({ message: "No batchmates found with that name" });
     }
-    res.status(200).json(result);
+
+    res.status(200).json(results);
   } catch (err) {
     console.error("Error in searchBatchmateByName:", err);
     res.status(500).json({ error: "Server error: " + err.message });
   }
 };
+
 
 // exports.searchBatchmateByName = async (req, res) => {
 //   try {
