@@ -13,10 +13,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Routes
-const batchmateRoutes = require('./routes/batchmateRoutes');
-app.use('/api/batchmates', batchmateRoutes);
-
 
 
 
@@ -33,6 +29,13 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+//! Routes
+
+//! batchmates route
+
+const batchmateRoutes = require('./routes/batchmateRoutes');
+app.use('/api/batchmates', batchmateRoutes);
+
 //!dropdown values from mongodb routes
 
 const currentRoleRoutes = require('./routes/currentRoleRoutes.js');
@@ -42,3 +45,9 @@ app.use('/api/cloud-knowledge-dropdown', cloudKnowledgeRoutes);
 
 app.use('/api/current-role-dropdown/', currentRoleRoutes);
 app.use("/api/indus-know-dropdown/", industryKnowledgeRoutes);
+
+//! Login Admin Routes
+
+const loginRoutes = require('./routes/loginRoutes.js');
+
+app.use('/api/login/',loginRoutes);

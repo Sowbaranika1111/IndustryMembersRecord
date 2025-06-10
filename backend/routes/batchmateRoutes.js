@@ -7,10 +7,11 @@ const {
   searchBatchmateByName,
   updateBatchmate,
   getBatchmateById,
+  deleteAllBatchmates
 } = require('../controllers/batchmateController');
 
 // Add new
-router.post('/', addBatchmate);
+router.post('/add', addBatchmate);
 
 // Get all
 router.get('/', getAllBatchmates);
@@ -23,5 +24,8 @@ router.put('/:name', updateBatchmate);
 
 // get by id
 router.get('/id/:id', getBatchmateById);  
+
+// DELETE
+router.delete("/delete-all", deleteAllBatchmates);
 
 module.exports = router;
