@@ -1,6 +1,8 @@
 const Batchmate = require("../models/Batchmate.js");
 const { appendToExcel } = require("../utils/excelHandler.js");
 
+// add POST http://localhost:5000/api/batchmates/add/
+
 exports.addBatchmate = async (req, res) => {
   try {
     const { email_address } = req.body;
@@ -61,6 +63,8 @@ exports.addBatchmate = async (req, res) => {
   }
 };
 
+//! Get all
+// http://localhost:5000/api/batchmates/
 exports.getAllBatchmates = async (req, res) => {
   try {
     const batchmates = await Batchmate.find().lean();
@@ -260,3 +264,23 @@ exports.updateBatchmate = async (req, res) => {
   }
 };
 
+//!Delete all
+// /api/batchmates/delete-all
+exports.deleteAllBatchmates = async (req, res) => {
+  try {
+    const result = await Batchmate.deleteMany({}); // empty filter deletes all documents
+
+    res.status(200).json({
+      success: true,
+      message: `${result.deletedCount} batchmate record(s) deleted successfully.`,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error("Error in deleteAllBatchmates:", err);
+    res.status(500).json({
+      success: false,
+      error: "Internal server error while deleting batchmate data.",
+      details: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
+  }
+};
