@@ -37,6 +37,8 @@ app.listen(PORT, () => {
 
 const currentRoleRoutes = require('./routes/currentRoleRoutes.js');
 const industryKnowledgeRoutes = require("./routes/industryKnowledgeRoutes.js");
+const cloudKnowledgeRoutes = require('./routes/cloudKnowledgeRoutes');
+app.use('/api/cloud-knowledge-dropdown', cloudKnowledgeRoutes);
 
 app.use('/api/current-role-dropdown/', currentRoleRoutes);
 app.use("/api/indus-know-dropdown/", industryKnowledgeRoutes);
