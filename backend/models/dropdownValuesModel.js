@@ -14,8 +14,13 @@ const industryKnowledgeSchema = new mongoose.Schema({
   value: { type: String, required: true },
 });
 
+
+
+
+
 // Export both models
 module.exports = {
   CurrentRole: mongoose.model("currentRoleValues", currentRoleSchema),
   IndustryKnowledge: mongoose.model("IndustryKnowledge", industryKnowledgeSchema),
+//  Role: mongoose.model('Role', roleSchema)
 };
