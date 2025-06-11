@@ -8,6 +8,7 @@ const {
   searchBatchmateByName,
   updateBatchmate,
   getBatchmateById,
+  deleteAllBatchmates
 } = require('../controllers/batchmateController');
 
 //updating current role based on drop down selected.
@@ -15,7 +16,7 @@ const {
 
 
 // Add new
-router.post('/', addBatchmate);
+router.post('/add', addBatchmate);
 
 // Get all
 router.get('/', getAllBatchmates);
@@ -28,5 +29,8 @@ router.put('/:name', updateBatchmate);
 
 // get by id
 router.get('/id/:id', getBatchmateById);  
+
+// DELETE
+router.delete("/delete-all", deleteAllBatchmates);
 
 module.exports = router;

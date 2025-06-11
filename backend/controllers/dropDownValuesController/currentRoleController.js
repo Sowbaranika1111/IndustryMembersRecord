@@ -2,11 +2,9 @@
 const {CurrentRole} = require('../../models/dropdownValuesModel.js')
 const Batchmate = require('../../models/Batchmate.js');
 
-<<<<<<< Updated upstream
-// GET /api/dropdown/current_role
+//! GET
 // http://localhost:5000/api/current-role-dropdown/ GET
 
-// OPTIONAL: Get all current roles (for reference)
 exports.getAllCurrentRoles = async (req, res) => {
   try {
     const roles = await CurrentRole.find({
@@ -31,7 +29,7 @@ exports.getAllCurrentRoles = async (req, res) => {
   }
 };
 
-// Add new current role
+//! Add new current role
 // http://localhost:5000/api/current-role-dropdown/add POST {"value" : "Dev"}
 =======
 
@@ -375,7 +373,7 @@ const insertAllCurrentRoles = async (req, res) => {
   }
 };
 
-// DELETE a current role by ID
+//! DELETE a current role by ID
 // http://localhost:5000/api/current-role-dropdown/delete/3 Delete
 exports.deleteCurrentRoleById = async (req, res) => {
   try {
@@ -441,6 +439,8 @@ exports.deleteCurrentRoleById = async (req, res) => {
 };
 
 //! BULK DELETE all current roles
+// http://localhost:5000/api/current-role-dropdown/deleteall 
+
 exports.deleteAllCurrentRoles = async (req, res) => {
   try {
     // Count existing documents before deletion
@@ -496,7 +496,7 @@ exports.deleteAllCurrentRoles = async (req, res) => {
 };
 
 //! BULK INSERT all current roles
-// http://localhost:5000/api/current-role-dropdown/bulk-insert/
+// http://localhost:5000/api/current-role-dropdown/bulk-insert/ POST {"value" : ["Dev","value1","value2"]}
 
 exports.insertAllCurrentRoles = async (req, res) => {
   try {
