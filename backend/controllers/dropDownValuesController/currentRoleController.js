@@ -1,9 +1,8 @@
 const { CurrentRole } = require("../../models/dropdownValuesModel.js");
 
-// GET /api/dropdown/current_role
+//! GET
 // http://localhost:5000/api/current-role-dropdown/ GET
 
-// OPTIONAL: Get all current roles (for reference)
 exports.getAllCurrentRoles = async (req, res) => {
   try {
     const roles = await CurrentRole.find({
@@ -28,7 +27,7 @@ exports.getAllCurrentRoles = async (req, res) => {
   }
 };
 
-// Add new current role
+//! Add new current role
 // http://localhost:5000/api/current-role-dropdown/add POST {"value" : "Dev"}
 
 exports.addNewCurrentRole = async (req, res) => {
@@ -149,7 +148,7 @@ exports.addNewCurrentRole = async (req, res) => {
   }
 };
 
-// DELETE a current role by ID
+//! DELETE a current role by ID
 // http://localhost:5000/api/current-role-dropdown/delete/3 Delete
 exports.deleteCurrentRoleById = async (req, res) => {
   try {
