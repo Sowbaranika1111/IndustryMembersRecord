@@ -1,6 +1,16 @@
 const Batchmate = require("../models/Batchmate.js");
 const { appendToExcel } = require("../utils/excelHandler.js");
 
+
+
+
+  
+
+
+
+
+
+
 exports.addBatchmate = async (req, res) => {
   try {
     const { email_address } = req.body;
@@ -139,34 +149,40 @@ exports.searchBatchmateByName = async (req, res) => {
   }
 };
 
+<<<<<<< Updated upstream
 
 // exports.searchBatchmateByName = async (req, res) => {
 //   try {
 //     const { name } = req.query;
+=======
+exports.searchBatchmateByName = async (req, res) => {
+  try {
+    const { name } = req.query;
+>>>>>>> Stashed changes
 
-//     if (!name) {
-//       return res
-//         .status(400)
-//         .json({ error: "Name query parameter is required" });
-//     }
+    if (!name) {
+      return res
+        .status(400)
+        .json({ error: "Name query parameter is required" });
+    }
 
-//     // Partial match, case-insensitive
-//     const regex = new RegExp(name, "i");
+    // Partial match, case-insensitive
+    const regex = new RegExp(name, "i");
 
-//     const results = await Batchmate.find({ name: regex }).lean();
+    const results = await Batchmate.find({ name: regex }).lean();
 
-//     if (!results || results.length === 0) {
-//       return res
-//         .status(404)
-//         .json({ message: "No batchmates found with that name" });
-//     }
+    if (!results || results.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No batchmates found with that name" });
+    }
 
-//     res.status(200).json(results);
-//   } catch (err) {
-//     console.error("Error in searchBatchmateByName:", err);
-//     res.status(500).json({ error: "Server error: " + err.message });
-//   }
-// };
+    res.status(200).json(results);
+  } catch (err) {
+    console.error("Error in searchBatchmateByName:", err);
+    res.status(500).json({ error: "Server error: " + err.message });
+  }
+};
 
 exports.updateBatchmate = async (req, res) => {
   try {
