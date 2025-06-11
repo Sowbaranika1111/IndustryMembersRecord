@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const {
+  updateCurrentRole,
   addBatchmate,
   getAllBatchmates,
   searchBatchmateByName,
@@ -9,6 +10,10 @@ const {
   getBatchmateById,
   deleteAllBatchmates
 } = require('../controllers/batchmateController');
+
+//updating current role based on drop down selected.
+// router.put('/updateRole/:id', updateCurrentRole); 
+
 
 // Add new
 router.post('/add', addBatchmate);
