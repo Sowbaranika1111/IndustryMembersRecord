@@ -151,16 +151,9 @@ exports.searchBatchmateByName = async (req, res) => {
   }
 };
 
-<<<<<<< Updated upstream
-
-// exports.searchBatchmateByName = async (req, res) => {
-//   try {
-//     const { name } = req.query;
-=======
 exports.searchBatchmateByName = async (req, res) => {
   try {
     const { name } = req.query;
->>>>>>> Stashed changes
 
     if (!name) {
       return res

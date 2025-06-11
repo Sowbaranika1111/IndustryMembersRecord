@@ -39,13 +39,7 @@ app.use('/api/batchmates', batchmateRoutes);
 //!dropdown values from mongodb routes
 
 const currentRoleRoutes = require('./routes/currentRoleRoutes.js');
-<<<<<<< Updated upstream
-const industryKnowledgeRoutes = require("./routes/industryKnowledgeRoutes.js");
-const cloudKnowledgeRoutes = require('./routes/cloudKnowledgeRoutes');
-app.use('/api/cloud-knowledge-dropdown', cloudKnowledgeRoutes);
-=======
 // const industryKnowledgeRoutes = require("./routes/industryKnowledgeRoutes.js");
->>>>>>> Stashed changes
 
 app.use('/api/current-roles/', currentRoleRoutes);
 // app.use("/api/indus-know-dropdown/", industryKnowledgeRoutes);

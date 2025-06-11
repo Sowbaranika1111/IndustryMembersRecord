@@ -218,7 +218,7 @@ exports.deleteCurrentRoleById = async (req, res) => {
 //! BULK DELETE all current roles
 // http://localhost:5000/api/current-role-dropdown/deleteall 
 
-exports.deleteAllCurrentRoles = async (req, res) => {
+  const deleteAllCurrentRoles = async (req, res) => {
   try {
     // Count existing documents before deletion
     const existingCount = await CurrentRole.countDocuments({
@@ -274,7 +274,7 @@ exports.deleteAllCurrentRoles = async (req, res) => {
 //! BULK INSERT all current roles
 // http://localhost:5000/api/current-role-dropdown/bulk-insert/ POST {"value" : ["Dev","value1","value2"]}
 
-exports.insertAllCurrentRoles = async (req, res) => {
+  const insertAllCurrentRoles = async (req, res) => {
   try {
     const { values } = req.body;
 
@@ -411,3 +411,10 @@ exports.insertAllCurrentRoles = async (req, res) => {
     });
   }
 };
+
+module.exports = {
+  getAllCurrentRoles,
+  deleteAllCurrentRoles,
+  insertAllCurrentRoles,
+  updateCurrentRole,
+}
