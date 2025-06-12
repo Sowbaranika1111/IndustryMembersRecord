@@ -1,16 +1,6 @@
 const Batchmate = require("../models/Batchmate.js");
 const { appendToExcel } = require("../utils/excelHandler.js");
 
-
-
-
-  
-
-
-
-
-
-
 exports.addBatchmate = async (req, res) => {
   try {
     const { email_address } = req.body;
@@ -21,11 +11,9 @@ exports.addBatchmate = async (req, res) => {
       email_address.trim() === "" ||
       !emailRegex.test(email_address.trim())
     ) {
-      return res
-        .status(400)
-        .json({
-          message: "A valid email address (email_address) is required.",
-        });
+      return res.status(400).json({
+        message: "A valid email address (email_address) is required.",
+      });
     }
     const normalizedEmail = email_address.toLowerCase().trim();
     const existingBatchmate = await Batchmate.findOne({
@@ -102,6 +90,88 @@ exports.getBatchmateById = async (req, res) => {
   }
 };
 
+// get by mail
+//! http://localhost:5000/api/batchmates/email?email=abc@accenture.com GET
+
+exports.getBatchmateByEmail = async (req, res) => {
+  try {
+    const { email } = req.query;
+
+    // Enhanced email validation
+    if (!email || typeof email !== "string" || email.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "A valid email query parameter is required.",
+      });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Email format validation (basic regex)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email format.",
+      });
+    }
+
+    // Fetch all available fields and exclude only sensitive ones
+    const batchmate = await Batchmate.findOne({
+      email_address: normalizedEmail,
+    })
+      .select("-otp -otp_expiry -role")
+      .lean();
+
+    if (!batchmate) {
+      return res.status(404).json({
+        success: false,
+        message: "Batchmate not found with the provided email address.",
+      });
+    }
+
+    console.log(
+      `GET_BATCHMATE_BY_EMAIL: Successfully retrieved data for '${normalizedEmail}'`
+    );
+
+    // Return consistent response structure
+    res.status(200).json({
+      success: true,
+      data: batchmate,
+      message: "Batchmate details retrieved successfully",
+    });
+  } catch (err) {
+    console.error("Error in getBatchmateByEmail:", err);
+
+    // Handle specific MongoDB errors
+    if (err.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        error: "Validation error",
+        details: err.message,
+      });
+    }
+
+    if (err.name === "CastError") {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid data format",
+        details: err.message,
+      });
+    }
+
+    // Generic server error
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+      message:
+        process.env.NODE_ENV === "development"
+          ? err.message
+          : "Something went wrong",
+    });
+  }
+};
+
 // exports.searchBatchmateByName = async (req, res) => {
 //   try {
 //     const { name } = req.query;
@@ -123,25 +193,28 @@ exports.getBatchmateById = async (req, res) => {
 //   }
 // };
 
-
 exports.searchBatchmateByName = async (req, res) => {
   try {
     const { name } = req.query;
 
     if (!name || typeof name !== "string") {
-      return res.status(400).json({ error: "Name query parameter is required" });
+      return res
+        .status(400)
+        .json({ error: "Name query parameter is required" });
     }
 
-    const escapedInput = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const escapedInput = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const regex = new RegExp(escapedInput, "i"); // Partial match, case-insensitive
 
     const results = await Batchmate.find({ name: regex })
-       .limit(12) // limit to 10 suggestions
+      .limit(12) // limit to 10 suggestions
       .sort({ name: 1 }) // sort alphabetically
       .lean();
 
     if (!results || results.length === 0) {
-      return res.status(404).json({ message: "No batchmates found with that name" });
+      return res
+        .status(404)
+        .json({ message: "No batchmates found with that name" });
     }
 
     res.status(200).json(results);
@@ -249,13 +322,11 @@ exports.updateBatchmate = async (req, res) => {
       const validationErrors = Object.values(error.errors).map(
         (err) => err.message
       );
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Validation failed",
-          errors: validationErrors,
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Validation failed",
+        errors: validationErrors,
+      });
     }
     if (error.code === 11000) {
       return res.status(409).json({
