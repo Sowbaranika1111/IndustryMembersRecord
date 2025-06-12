@@ -45,6 +45,9 @@ app.use('/api/current-roles/', currentRoleRoutes);
 // app.use("/api/indus-know-dropdown/", industryKnowledgeRoutes);
 const workLocationRoutes = require('./routes/workLocationRoutes.js')
 app.use('/api/work-location/', workLocationRoutes);
+//cloud-knowledge
+const cloudKnowledgeRoutes = require('./routes/cloudKnowledgeRoutes');
+app.use('/api/cloud-knowledge-dropdown', cloudKnowledgeRoutes);
 
 //! Login Admin Routes
 

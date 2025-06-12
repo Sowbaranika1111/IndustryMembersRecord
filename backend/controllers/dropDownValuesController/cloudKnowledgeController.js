@@ -1,4 +1,5 @@
 const { CloudKnowledge } = require("../../models/dropdownValuesModel");
+const Batchmate = require("../../models/Batchmate"); // 
 
 // GET all cloud knowledge values
 exports.getCloudKnowledgeValues = async (req, res) => {
@@ -98,7 +99,7 @@ exports.deleteAllCloudKnowledge = async (req, res) => {
     });
   }
 };
-
+/*
 // BULK INSERT
 exports.insertAllCloudKnowledge = async (req, res) => {
   try {
@@ -159,5 +160,129 @@ exports.insertAllCloudKnowledge = async (req, res) => {
       error: "Internal server error",
       success: false,
     });
+  }
+};
+
+*/
+exports.insertAndAssignCloudKnowledge = async (req, res) => {
+  try {
+    const { batchmateId } = req.params;
+    const { value } = req.body;
+
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Cloud value is required." });
+    }
+
+    const trimmedValue = value.trim();
+
+    //  Add to dropdown if not already present
+    let cloudKnowledge = await CloudKnowledge.findOne({
+      category: "cloud_knowledge",
+      value: trimmedValue,
+    });
+
+    if (!cloudKnowledge) {
+      const lastEntry = await CloudKnowledge.findOne({ category: "cloud_knowledge" }).sort({ id: -1 });
+      const nextId = lastEntry ? lastEntry.id + 1 : 1;
+
+      cloudKnowledge = new CloudKnowledge({
+        id: nextId,
+        category: "cloud_knowledge",
+        value: trimmedValue,
+      });
+
+      await cloudKnowledge.save();
+    }
+
+    //  Find batchmate
+    const batchmate = await Batchmate.findById(batchmateId);
+    if (!batchmate) {
+      return res.status(404).json({ error: "Batchmate not found." });
+    }
+
+    //  Clean and check cloud_knowledge string
+    let cloudKnowledgeArray = (batchmate.cloud_knowledge || "")
+      .split(",")
+      .map((item) => item.trim());
+
+    // Convert all existing values to lowercase for comparison
+    const lowerCaseCloudKnowledgeArray = cloudKnowledgeArray.map(item => item.toLowerCase());
+
+    const valueLower = trimmedValue.toLowerCase();
+    const alreadyExists = lowerCaseCloudKnowledgeArray.includes(valueLower);
+
+    if (!alreadyExists) {
+      cloudKnowledgeArray.push(trimmedValue);
+    }
+
+    // Remove duplicates while preserving case of first entry
+    const uniqueCloudKnowledgeArray = [];
+    const seenLower = new Set();
+
+    for (const item of cloudKnowledgeArray) {
+      const itemLower = item.toLowerCase();
+      if (!seenLower.has(itemLower)) {
+        uniqueCloudKnowledgeArray.push(item);
+        seenLower.add(itemLower);
+      }
+    }
+
+    //  Update only cloud_knowledge field using $set
+    await Batchmate.findByIdAndUpdate(
+      batchmateId,
+      { $set: { cloud_knowledge: uniqueCloudKnowledgeArray.join(", ") } },
+      { runValidators: false } // Disable validation during update
+    );
+
+    res.status(200).json({
+      message: "Cloud knowledge updated successfully.",
+      cloud_knowledge: uniqueCloudKnowledgeArray.join(", "),
+      addedToDropdown: !alreadyExists,
+    });
+
+  } catch (error) {
+    console.error("insertAndAssignCloudKnowledge error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+exports.removeCloudKnowledgeFromBatchmate = async (req, res) => {
+  try {
+    const { batchmateId } = req.params;
+    const { value } = req.body;
+
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Cloud value is required." });
+    }
+
+    const trimmedValue = value.trim().toLowerCase();
+
+    // : Find the batchmate
+    const batchmate = await Batchmate.findById(batchmateId);
+    if (!batchmate) {
+      return res.status(404).json({ error: "Batchmate not found." });
+    }
+
+    //  Clean up and remove the matching value
+    const cloudKnowledgeArray = (batchmate.cloud_knowledge || "")
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item && item.toLowerCase() !== trimmedValue);
+
+    // Step 3: Update field without triggering validation
+    await Batchmate.findByIdAndUpdate(
+      batchmateId,
+      { $set: { cloud_knowledge: cloudKnowledgeArray.join(", ") } },
+      { runValidators: false }
+    );
+
+    res.status(200).json({
+      message: "Cloud knowledge removed successfully.",
+      updated_cloud_knowledge: cloudKnowledgeArray.join(", "),
+    });
+  } catch (error) {
+    console.error("removeCloudKnowledgeFromBatchmate error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

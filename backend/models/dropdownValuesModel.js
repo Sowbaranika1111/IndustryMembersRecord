@@ -13,6 +13,13 @@
     value: { type: String, required: true },
   });
 
+  //cloud-knowledge Schema
+  const cloudKnowledgeSchema = new mongoose.Schema({
+  id: { type: Number, required: true, unique: true },
+  category: { type: String, required: true, default: 'cloud_knowledge' },
+  value: { type: String, required: true },
+});
+
   // Industry Knowledge Schema
   // const industryKnowledgeSchema = new mongoose.Schema({
   //   id: { type: Number, required: true, unique: true },
@@ -24,6 +31,6 @@
   module.exports = {
     CurrentRole: mongoose.model("CurrentRole", currentRoleSchema),
     WorkLocation: mongoose.model("WorkLocation", workLocationSchema),
-    // ,
+    CloudKnowledge:mongoose.model('CloudKnowledge', cloudKnowledgeSchema),
     // IndustryKnowledge: mongoose.model("IndustryKnowledge", industryKnowledgeSchema),
   };
