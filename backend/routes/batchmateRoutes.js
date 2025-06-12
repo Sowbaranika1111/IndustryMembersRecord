@@ -8,6 +8,7 @@ const {
   searchBatchmateByName,
   updateBatchmate,
   getBatchmateById,
+  getBatchmateByEmail,
   deleteAllBatchmates
 } = require('../controllers/batchmateController');
 
@@ -29,6 +30,10 @@ router.put('/:name', updateBatchmate);
 
 // get by id
 router.get('/id/:id', getBatchmateById);  
+
+// GET by email
+router.get("/email", getBatchmateByEmail);
+
 
 // DELETE
 router.delete("/delete-all", deleteAllBatchmates);
