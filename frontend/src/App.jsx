@@ -15,7 +15,7 @@ export default function App() {
       <Routes>
         <Route path="/home" element={<Home />} />
         <Route path="/search" element={<Search />} />
-        <Route path="/profile/:batchmateId" element={<Profile />} /> 
+        <Route path="/profile/:enterpriseId" element={<Profile />} /> 
         <Route path="/add" element={<Add />} />
         <Route path="/" element={< Login/>} />
       </Routes>

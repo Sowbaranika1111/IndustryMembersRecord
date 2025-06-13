@@ -6,14 +6,16 @@ import axios from 'axios';
 const API_BASE_URL = 'http://localhost:5000';
 
 export default function Profile() {
-    const { batchmateId } = useParams(); // Get batchmateId from URL parameters
+    // Get the enterpriseId from the URL (e.g., 'john.doe' from '/profile/john.doe')
+    const { enterpriseId } = useParams();
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
-        if (!batchmateId) {
-            setError("No batchmate ID provided.");
+        // This effect runs whenever the enterpriseId in the URL changes.
+        if (!enterpriseId) {
+            setError("No enterprise ID provided in the URL.");
             setLoading(false);
             return;
         }
@@ -22,8 +24,14 @@ export default function Profile() {
             setLoading(true);
             setError('');
             try {
-                const response = await axios.get(`${API_BASE_URL}/api/batchmates/id/${batchmateId}`);
-                setProfileData(response.data);
+                // Construct the full email address required by the API
+                const emailAddress = `${enterpriseId}@accenture.com`;
+                
+                // Fetch the user data from the correct endpoint using the email
+                const response = await axios.get(`${API_BASE_URL}/api/batchmates/email?email=${emailAddress}`);
+                
+                // Store the fetched profile data in the component's state
+                setProfileData(response.data.data);
             } catch (err) {
                 console.error("Error fetching profile data:", err);
                 if (err.response) {
@@ -39,22 +47,27 @@ export default function Profile() {
         };
 
         fetchProfileData();
-    }, [batchmateId]);
+    }, [enterpriseId]); // The dependency array ensures this runs again if the ID changes
 
+    // Conditional rendering for loading state
     if (loading) {
         return <div style={{ textAlign: 'center', padding: '50px', fontSize: '18px' }}>Loading profile...</div>;
     }
 
+    // Conditional rendering for error state
     if (error) {
         return <div style={{ textAlign: 'center', padding: '50px', fontSize: '18px', color: 'red' }}>Error: {error}</div>;
     }
 
+    // Conditional rendering if no data is found after loading
     if (!profileData) {
         return <div style={{ textAlign: 'center', padding: '50px', fontSize: '18px' }}>Profile data not available.</div>;
     }
+
+    // Main JSX rendering using the fetched profileData
     return (
         <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
-            {/* Centered Avatar */}
+            {/* Centered Avatar and Name Section */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
                 <div style={{
                     width: '120px',
@@ -96,7 +109,7 @@ export default function Profile() {
             </div>
 
 
-            {/* Two-column Details Section in a Row */}
+            {/* Two-column Details Section */}
             <div
                 style={{
                     display: 'flex',
@@ -107,7 +120,7 @@ export default function Profile() {
                     justifyContent: 'space-between'
                 }}
             >
-                {/* Left Box */}
+                {/* Left Column */}
                 <div style={{
                     width: '100%',
                     padding: '20px',
@@ -135,7 +148,7 @@ export default function Profile() {
                     <p><strong>PLM Upgrade:</strong> {profileData.plm_upgrade || 'N/A'}</p>
                 </div>
 
-                {/* Right Box */}
+                {/* Right Column */}
                 <div style={{
                     width: '100%',
                     padding: '20px',
@@ -147,11 +160,11 @@ export default function Profile() {
                     fontFamily: '"Roboto Condensed", sans-serif'
                 }}>
                     <p><strong>PLM CAD Integration:</strong> {profileData.plm_cad_integration || 'N/A'}</p>
-                    <p><strong>PLM Interface Integration:</strong> {profileData.plm_interfaceintegration || 'N/A'}</p>
+                    <p><strong>PLM Interface Integration:</strong> {profileData.plm_interface_integration || 'N/A'}</p>
                     <p><strong>PLM SAP Integration:</strong> {profileData.plm_sap_integration || 'N/A'}</p>
                     <p><strong>TC Manufacturing:</strong> {profileData.tc_manufacturing || 'N/A'}</p>
-                    <p><strong>PLM-QMS Integration:</strong> {profileData.plmqms_integration || 'N/A'}</p>
-                    <p><strong>SW Engineering:</strong> {profileData.sw_engineering || 'N/A'}</p>
+                    <p><strong>PLM-QMS Integration:</strong> {profileData.plm_qms_integration || 'N/A'}</p>
+                    <p><strong>Software Engineering:</strong> {profileData.software_engineering || 'N/A'}</p>
                     <p><strong>Project Management:</strong> {profileData.project_management || 'N/A'}</p>
                     <p><strong>PLM Functional:</strong> {profileData.plm_functional || 'N/A'}</p>
                     <p><strong>PLM Migration:</strong> {profileData.plm_migration || 'N/A'}</p>

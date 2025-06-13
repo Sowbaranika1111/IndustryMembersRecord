@@ -1,12 +1,13 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs")
 
 const batchmateSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    role: { type: String, default: "user" },
+    role: { type: String, enum: ["user", "admin"], default: "user" },
     otp: { type: String }, // Store hashed OTP
     otp_expiry: { type: Date }, // Expiry timestamp
-    email_address: { type: String, required: true, unique: true },
+    email_address: { type: String, required: true, unique: true, lowercase: true, trim: true },
     primary_skill: { type: String },
     additional_skills: { type: String },
     management_level: { type: String },
@@ -45,4 +46,15 @@ const batchmateSchema = new mongoose.Schema(
   { strict: false, timestamps: true }
 );
 
+batchmateSchema.pre("save", async function (next) {
+  if (this.isModified("otp") && this.otp) {
+    const salt = await bcrypt.genSalt(10);
+    this.otp = await bcrypt.hash(this.otp, salt);
+  }
+  next();
+});
+
+batchmateSchema.methods.compareOtp = async function (enteredOtp) {
+  return await bcrypt.compare(enteredOtp, this.otp);
+};
 module.exports = mongoose.model("Batchmate", batchmateSchema);
