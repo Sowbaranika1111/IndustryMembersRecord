@@ -1,33 +1,50 @@
-// backend/server.js
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const dotenv = require('dotenv');
+require("dotenv").config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
 
-require("./db/dbconnect");
+const loginRoutes = require("./routes/loginRoutes.js");
 
-dotenv.config();
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', // Your React app's URL
+  credentials: true // Allow cookies to be sent
+}));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+// Session Management
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24 // 1 day
+  }
+}));
 
+// API Routes
+app.use("/api/login", loginRoutes);
 
-
-// Excel file route (optional)
-const path = require('path');
-app.get('/download/excel', (req, res) => {
-  const file = path.join(__dirname, 'excel', 'batchmates.xlsx');
-  res.download(file);
-});
-
-// DB Connection and Server Start
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Database Connection
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    console.log("MongoDB Connected...");
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  })
+  .catch((err) => console.error(err));
 
 //! Routes
 
@@ -56,7 +73,5 @@ app.use('/api/project-dropdown', projectRoutes);
 
 
 //! Login Admin Routes
-
-const loginRoutes = require('./routes/loginRoutes.js');
 
 app.use('/api/login/',loginRoutes);
