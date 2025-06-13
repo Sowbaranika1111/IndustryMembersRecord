@@ -1,20 +1,23 @@
 const express = require("express");
-   const router = express.Router();
-   const cloudKnowledgeController = require("../controllers/dropDownValuesController/cloudKnowledgeController");
+const router = express.Router();
 
-   // GET existing values
-   router.get("/", cloudKnowledgeController.getCloudKnowledgeValues);
+const {
+  getAllCloudKnowledge,
+  addCloudKnowledge,
+  deleteCloudKnowledgeById,
+  deleteAllCloudKnowledge
+} = require("../controllers/dropDownValuesController/cloudKnowledgeController");
 
-   // POST new value
-   router.post("/add", cloudKnowledgeController.addNewCloudKnowledge);
+// GET all cloud knowledge values
+router.get("/", getAllCloudKnowledge);
 
-   // DELETE by ID
-   router.delete("/delete/:id", cloudKnowledgeController.deleteCloudKnowledgeById);
+// POST add new cloud knowledge
+router.post("/add", addCloudKnowledge);
 
-   // DELETE all values
-   router.delete("/deleteall", cloudKnowledgeController.deleteAllCloudKnowledge);
+// DELETE cloud knowledge by ID
+router.delete("/delete/:id", deleteCloudKnowledgeById);
 
-   // BULK insert values
-   router.post("/bulk-insert", cloudKnowledgeController.insertAllCloudKnowledge);
+// DELETE all cloud knowledge
+router.delete("/deleteall", deleteAllCloudKnowledge);
 
-   module.exports = router;
+module.exports = router;
