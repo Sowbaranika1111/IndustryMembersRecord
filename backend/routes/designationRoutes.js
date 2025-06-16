@@ -4,7 +4,7 @@ const {
   updateDesignation,
   getAllDesignations,
   deleteAllDesignations,
-  insertBulkDesignations,
+  insertAllDesignations,
   // addNewCurrentRole,
   // deleteCurrentRoleById,
   // deleteAllCurrentRoles,
@@ -25,6 +25,6 @@ router.put("/updateDesignation/:id",updateDesignation);
 router.delete("/deleteAllDesignations", deleteAllDesignations);
 
 // BULK insert roles
-router.post("/insertAllDesignations", insertBulkDesignations);
+router.post("/insertAllDesignations", insertAllDesignations);
 
 module.exports = router;

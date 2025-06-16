@@ -1,23 +1,50 @@
 const mongoose = require("mongoose");
 
 // Current Role Schema
+// const currentRoleSchema = new mongoose.Schema({
+//   id: { type: Number, required: true, unique: true },
+//   value: { type: String, required: true },
+// });
+
 const currentRoleSchema = new mongoose.Schema({
-  id: { type: Number, required: true, unique: true },
-  value: { type: String, required: true },
+  // The manual 'id' field is GONE. This is the fix.
+  // We rely on MongoDB's automatic _id.
+
+  value: {
+    type: String,
+    required: true,
+    unique: true,   // A database-level rule to prevent duplicate role names.
+    trim: true,
+  },
+}, {
+  timestamps: true, // Automatically adds createdAt and updatedAt.
 });
+
+
+
 
 //work location schema
 
 const workLocationSchema = new mongoose.Schema({
-  id: { type: Number, required: true, unique: true },
-  value: { type: String, required: true },
+  value: {
+    type: String,
+    required: true,
+    unique: true,   // A database-level rule to prevent duplicate role names.
+    trim: true,
+  },
+}, {
+  timestamps: true, // Automatically adds createdAt and updatedAt.
 });
 
   const designationSchema = new mongoose.Schema({
-  
-  id: {
-    type: Number, required: [true, 'A designation ID is required.'],unique: true},
-  value: {type: String,required: true }
+ value: {
+    type: String,
+    required: true,
+    unique: true,   // A database-level rule to prevent duplicate role names.
+    trim: true,
+  },
+}, {
+  timestamps: true, // Automatically adds createdAt and updatedAt.
 });
 
 

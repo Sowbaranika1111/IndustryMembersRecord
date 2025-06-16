@@ -215,198 +215,108 @@ exports.deleteCurrentRoleById = async (req, res) => {
 };
 
 //! BULK DELETE all current roles
-// http://localhost:5000/api/current-roles/deleteall 
 
-  const deleteAllCurrentRoles = async (req, res) => {
+const deleteAllCurrentRoles = async (req, res) => {
   try {
-    // Count existing documents before deletion
-    const existingCount = await CurrentRole.countDocuments({
-      category: "current_role",
-    });
+    // 1. Call the database logic to delete all documents in the collection.
+    // The result object contains information like `deletedCount`.
+    const deletionResult = await CurrentRole.deleteMany({});
 
-    if (existingCount === 0) {
+    // 2. Check how many documents were deleted to provide an accurate response.
+    if (deletionResult.deletedCount === 0) {
+      // This is not an error, but it's good to inform the user that nothing needed to be done.
       return res.status(200).json({
-        message: "No current role values found to delete.",
         success: true,
+        message: "No roles to delete. The collection was already empty.",
         deletedCount: 0,
       });
     }
 
-    // Delete all current role documents
-    const deleteResult = await CurrentRole.deleteMany({
-      category: "current_role",
-    });
-
-    // Verify deletion was successful
-    const remainingCount = await CurrentRole.countDocuments({
-      category: "current_role",
-    });
-
-    if (remainingCount > 0) {
-      return res.status(500).json({
-        error: "Deletion incomplete. Some documents may still exist.",
-        success: false,
-        deletedCount: deleteResult.deletedCount,
-        remainingCount: remainingCount,
-      });
-    }
-
+    // 3. Send a clear SUCCESS response confirming the deletion.
     res.status(200).json({
-      message: `Successfully deleted all current role values.`,
       success: true,
-      deletedCount: deleteResult.deletedCount,
-      operation: "DELETE_ALL_CURRENT_ROLES",
-      timestamp: new Date().toISOString(),
+      message: `Successfully deleted all ${deletionResult.deletedCount} roles.`,
+      deletedCount: deletionResult.deletedCount,
     });
-  } catch (err) {
-    console.error("Error in deleteAllCurrentRoles:", err);
 
+  } catch (err) {
+    // 4. If any unexpected server or database error occurs, this block will run.
+    console.error("Error in deleteAllRoles:", err);
+
+    // 5. Send a generic 500 Internal Server Error response.
     res.status(500).json({
-      error:
-        "Internal server error occurred while deleting current role values.",
       success: false,
-      details: process.env.NODE_ENV === "development" ? err.message : undefined,
+      error: "An internal server error occurred while deleting roles.",
     });
   }
 };
-
 //! BULK INSERT all current roles
 // http://localhost:5000/api/current-roles/insertAllCurrentRoles/ POST {"value" : ["Dev","value1","value2"]}
 
-  const insertAllCurrentRoles = async (req, res) => {
-  try {
-    const { values } = req.body;
 
-    // Validate input
+
+const insertAllCurrentRoles = async (req, res) => {
+  try {
+    // 1. VALIDATE INPUT: Expects a simple array of strings.
+    const values = req.body;
     if (!Array.isArray(values) || values.length === 0) {
       return res.status(400).json({
-        error: "Values must be a non-empty array.",
         success: false,
+        error: "Request body must be a non-empty array of role names.",
       });
     }
 
-    // Normalize values - trim whitespace and filter out empty strings
-    const inputValues = values
-      .map((v) => {
-        if (typeof v !== "string") {
-          throw new Error(
-            `Invalid value type: ${typeof v}. All values must be strings.`
-          );
-        }
-        return v.trim();
-      })
-      .filter((v) => v.length > 0); // Remove empty strings after trimming
+    // 2. NORMALIZE DATA: Clean up the input by trimming whitespace,
+    // filtering out empty values, and keeping only unique role names.
+    const uniqueInputValues = [...new Set(
+        values.map(v => String(v).trim()).filter(Boolean)
+    )];
 
-    if (inputValues.length === 0) {
-      return res.status(400).json({
-        error: "No valid values provided after filtering empty strings.",
-        success: false,
-      });
+    if (uniqueInputValues.length === 0) {
+      return res.status(400).json({ success: false, error: "No valid role names provided after filtering." });
     }
 
-    // Remove duplicates from input array
-    const uniqueInputValues = [...new Set(inputValues)];
+    // 3. CHECK FOR DUPLICATES: Efficiently find which of the roles
+    // already exist in the database.
+    const existingDocs = await CurrentRole.find({ value: { $in: uniqueInputValues } });
+    const existingValues = new Set(existingDocs.map(doc => doc.value));
 
-    // Check for existing values in the database (case-insensitive)
-    const existingDocs = await CurrentRole.find({
-      category: "current_role",
-      value: {
-        $in: uniqueInputValues.map(
-          (val) =>
-            new RegExp(`^${val.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i")
-        ),
-      },
-    });
+    // 4. PREPARE NEW ROLES: Filter the input to get only the roles
+    // that are genuinely new.
+    const newValuesToInsert = uniqueInputValues.filter(val => !existingValues.has(val));
+    const alreadyExistCount = uniqueInputValues.length - newValuesToInsert.length;
 
-    const existingValues = existingDocs.map((doc) => doc.value);
-
-    // Filter out values that already exist (case-insensitive comparison)
-    const newValues = uniqueInputValues.filter(
-      (val) =>
-        !existingValues.some(
-          (existing) => existing.toLowerCase() === val.toLowerCase()
-        )
-    );
-
-    // Prepare response messages for existing values
-    const existingMessages = existingValues.map(
-      (value) => `Value "${value}" already exists`
-    );
-
-    // If no new values to insert
-    if (newValues.length === 0) {
+    // If there are no new roles to add, we're done. This is a success.
+    if (newValuesToInsert.length === 0) {
       return res.status(200).json({
-        message:
-          "No new values inserted. All provided values already exist in the database.",
         success: true,
-        existingValues: existingMessages,
+        message: "No new roles were added as all provided roles already exist.",
         totalProvided: uniqueInputValues.length,
-        alreadyExists: existingValues.length,
         inserted: 0,
+        alreadyExists: alreadyExistCount,
       });
     }
 
-    // Find the highest existing ID for proper sequencing
-    const lastEntry = await CurrentRole.findOne({
-      category: "current_role",
-    }).sort({ id: -1 });
+    // 5. INSERT: Prepare the new documents and insert them in one go.
+    const documentsToInsert = newValuesToInsert.map(value => ({ value }));
+    const inserted = await CurrentRole.insertMany(documentsToInsert);
 
-    let nextId = lastEntry ? lastEntry.id + 1 : 1;
-
-    // Prepare documents for insertion
-    const documents = newValues.map((value) => ({
-      id: nextId++,
-      category: "current_role",
-      value,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
-
-    // Insert new documents
-    const inserted = await CurrentRole.insertMany(documents);
-
-    // Prepare success response
-    const response = {
-      message: `Successfully inserted ${inserted.length} new current role values.`,
+    // 6. RESPOND: Send a clear, detailed success response.
+    res.status(201).json({
       success: true,
+      message: `Successfully added ${inserted.length} new role(s).`,
       totalProvided: uniqueInputValues.length,
       inserted: inserted.length,
-      alreadyExists: existingValues.length,
-      insertedValues: inserted.map((doc) => doc.value),
-    };
+      alreadyExists: alreadyExistCount,
+      insertedValues: inserted.map(doc => doc.value),
+    });
 
-    // Include existing values info if any
-    if (existingValues.length > 0) {
-      response.existingValues = existingMessages;
-      response.message += ` ${existingValues.length} values were already present in the database.`;
-    }
-
-    res.status(201).json(response);
   } catch (err) {
-    console.error("Error in insertAllCurrentRoles:", err);
-
-    // Handle specific MongoDB errors
-    if (err.code === 11000) {
-      return res.status(409).json({
-        error: "Duplicate key error: One or more values already exist.",
-        success: false,
-      });
-    }
-
-    // Handle validation errors
-    if (err.name === "ValidationError") {
-      return res.status(400).json({
-        error: `Validation error: ${err.message}`,
-        success: false,
-      });
-    }
-
-    // Generic error response
+    // This will now only catch unexpected server errors, making it very clean.
+    console.error("Error in addRoles:", err);
     res.status(500).json({
-      error:
-        "Internal server error occurred while inserting current role values.",
       success: false,
-      details: process.env.NODE_ENV === "development" ? err.message : undefined,
+      error: "An internal server error occurred.",
     });
   }
 };
