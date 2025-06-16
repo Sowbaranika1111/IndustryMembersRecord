@@ -150,82 +150,73 @@ const deleteAllDesignations = async (req, res) => {
 };
 
 //inserting bulk designations
-const insertBulkDesignations = async (req, res) => {
+const insertAllDesignations = async (req, res) => {
   try {
-    // 1. Get the array of objects from the request body.
-    // e.g., [{ "value": "Design Engineer" }, { "value": "Software Architect" }]
-    const designationsToInsert = req.body;
-
-    // 2. Perform initial validation.
-    if (!Array.isArray(designationsToInsert) || designationsToInsert.length === 0) {
+    // 1. VALIDATE INPUT: Expects a simple array of strings.
+    const values = req.body;
+    if (!Array.isArray(values) || values.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Request body must be a non-empty array of designation objects.",
+        error: "Request body must be a non-empty array of designation names.",
       });
     }
 
-    // =====================================================================
-    // ==> THE FIX: AUTOMATIC ID GENERATION <==
-    // =====================================================================
+    // 2. NORMALIZE DATA: Clean up the input by trimming whitespace,
+    // filtering out empty values, and keeping only unique designation names.
+    const uniqueInputValues = [...new Set(
+        values.map(v => String(v).trim()).filter(Boolean)
+    )];
 
-    // A. Find the designation with the highest current 'id'.
-    // We sort by 'id' in descending order (-1) and take the first one.
-    const lastDesignation = await Designation.findOne().sort({ id: -1 });
-
-    // B. Determine the starting ID for the new batch.
-    // If there's a last designation, start from its id + 1. Otherwise, start from 1.
-    const startId = lastDesignation ? lastDesignation.id + 1 : 1;
-
-    // C. Format the incoming data to include the new sequential IDs.
-    // We use .map() to transform the original array into a new one.
-    const formattedData = designationsToInsert.map((item, index) => ({
-      id: startId + index,      // e.g., 101 + 0 = 101, 101 + 1 = 102, ...
-      value: item.value         // The value from the request body
-    }));
-
-    // console.log("Data with generated IDs being sent to DB:", formattedData); // For debugging
-
-    // =====================================================================
-
-    // 3. Use insertMany with the FULLY-FORMATTED data.
-    const createdDesignations = await Designation.insertMany(formattedData, { ordered: false });
-
-    // Handle case where all items were duplicates (based on 'value' if you add unique constraint)
-    if (createdDesignations.length === 0 && designationsToInsert.length > 0) {
-        return res.status(409).json({ // 409 Conflict
-          success: false,
-          message: "Insertion failed. All provided designations might already exist.",
-        });
+    if (uniqueInputValues.length === 0) {
+      return res.status(400).json({ success: false, error: "No valid designation names provided after filtering." });
     }
 
-    // 4. Send a SUCCESS response.
+    // 3. CHECK FOR DUPLICATES: Efficiently find which of the designations
+    // already exist in the database.
+    const existingDocs = await Designation.find({ value: { $in: uniqueInputValues } });
+    const existingValues = new Set(existingDocs.map(doc => doc.value));
+
+    // 4. PREPARE NEW DESIGNATIONS: Filter the input to get only the designations
+    // that are genuinely new.
+    const newValuesToInsert = uniqueInputValues.filter(val => !existingValues.has(val));
+    const alreadyExistCount = uniqueInputValues.length - newValuesToInsert.length;
+
+    // If there are no new designations to add, we're done. This is a success.
+    if (newValuesToInsert.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No new designations were added as all provided designations already exist.",
+        totalProvided: uniqueInputValues.length,
+        inserted: 0,
+        alreadyExists: alreadyExistCount,
+      });
+    }
+
+    // 5. INSERT: Prepare the new documents and insert them in one go.
+    // The documents only need the 'value' field.
+    const documentsToInsert = newValuesToInsert.map(value => ({ value }));
+    const inserted = await Designation.insertMany(documentsToInsert);
+
+    // 6. RESPOND: Send a clear, detailed success response.
     res.status(201).json({
       success: true,
-      message: `Successfully inserted ${createdDesignations.length} new designations.`,
-      count: createdDesignations.length,
-      data: createdDesignations,
+      message: `Successfully added ${inserted.length} new designation(s).`,
+      totalProvided: uniqueInputValues.length,
+      inserted: inserted.length,
+      alreadyExists: alreadyExistCount,
+      insertedValues: inserted.map(doc => doc.value),
     });
 
-  } catch (error) {
-    // 5. Handle potential errors.
-    console.error("Server Error in insertBulkDesignations:", error);
-
-    if (error.code === 11000) {
-      // This will now trigger if an 'id' or 'value' (if unique) is a duplicate.
-      return res.status(409).json({
-        success: false,
-        message: "Bulk insert failed. One or more designations have a duplicate 'id' or 'value' that already exists.",
-        error: error.message,
-      });
-    }
-
+  } catch (err) {
+    // This will catch any unexpected server or database errors.
+    console.error("Error in addDesignations:", err);
     res.status(500).json({
       success: false,
-      message: "Internal Server Error during bulk insert.",
+      error: "An internal server error occurred while adding designations.",
     });
   }
 };
 
 module.exports = {
-  updateDesignation,getAllDesignations,deleteAllDesignations,insertBulkDesignations,
+  updateDesignation,getAllDesignations,deleteAllDesignations,insertAllDesignations,
 };

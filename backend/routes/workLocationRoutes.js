@@ -6,6 +6,7 @@ const {
   updateWorkLocation,
   getAllWorkLocations,
   deleteAllWorkLocations,
+  insertAllWorkLocations,
   
   // addNewCurrentRole,
   // deleteCurrentRoleById,
@@ -17,5 +18,6 @@ const {
 router.put("/updateWorkLocation/:id", updateWorkLocation); 
 router.get("/getAllWorkLocations",getAllWorkLocations);
 router.delete("/deleteAllWorkLocations",deleteAllWorkLocations);
+router.post("/insertAllWorkLocations", insertAllWorkLocations);
 
 module.exports = router;

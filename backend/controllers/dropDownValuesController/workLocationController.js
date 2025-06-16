@@ -137,7 +137,77 @@ const deleteAllWorkLocations = async (req, res) => {
     });
   }
 };
+//insert all worklocations(BULK)
+
+const insertAllWorkLocations = async (req, res) => {
+  try {
+    // 1. VALIDATE INPUT: Expects a simple array of strings.
+    const values = req.body;
+    if (!Array.isArray(values) || values.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "Request body must be a non-empty array of work location names.",
+      });
+    }
+
+    // 2. NORMALIZE DATA: Clean up the input by trimming whitespace,
+    // filtering out empty values, and keeping only unique location names.
+    const uniqueInputValues = [...new Set(
+        values.map(v => String(v).trim()).filter(Boolean)
+    )];
+
+    if (uniqueInputValues.length === 0) {
+      return res.status(400).json({ success: false, error: "No valid work location names provided after filtering." });
+    }
+
+    // 3. CHECK FOR DUPLICATES: Efficiently find which of the locations
+    // already exist in the database.
+    const existingDocs = await WorkLocation.find({ value: { $in: uniqueInputValues } });
+    const existingValues = new Set(existingDocs.map(doc => doc.value));
+
+    // 4. PREPARE NEW LOCATIONS: Filter the input to get only the locations
+    // that are genuinely new.
+    const newValuesToInsert = uniqueInputValues.filter(val => !existingValues.has(val));
+    const alreadyExistCount = uniqueInputValues.length - newValuesToInsert.length;
+
+    // If there are no new locations to add, we're done. This is a success.
+    if (newValuesToInsert.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No new work locations were added as all provided locations already exist.",
+        totalProvided: uniqueInputValues.length,
+        inserted: 0,
+        alreadyExists: alreadyExistCount,
+      });
+    }
+
+    // 5. INSERT: Prepare the new documents and insert them in one go.
+    // The documents only need the 'value' field, as MongoDB handles the rest.
+    const documentsToInsert = newValuesToInsert.map(value => ({ value }));
+    const inserted = await WorkLocation.insertMany(documentsToInsert);
+
+    // 6. RESPOND: Send a clear, detailed success response.
+    res.status(201).json({
+      success: true,
+      message: `Successfully added ${inserted.length} new work location(s).`,
+      totalProvided: uniqueInputValues.length,
+      inserted: inserted.length,
+      alreadyExists: alreadyExistCount,
+      insertedValues: inserted.map(doc => doc.value),
+    });
+
+  } catch (err) {
+    // This will catch any unexpected server or database errors.
+    console.error("Error in addWorkLocations:", err);
+    res.status(500).json({
+      success: false,
+      error: "An internal server error occurred while adding work locations.",
+    });
+  }
+};
+
+
 
 module.exports = {
-  updateWorkLocation,getAllWorkLocations,deleteAllWorkLocations,
+  updateWorkLocation,getAllWorkLocations,deleteAllWorkLocations,insertAllWorkLocations,
 };
