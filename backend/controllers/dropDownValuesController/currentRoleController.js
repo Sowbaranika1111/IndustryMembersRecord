@@ -3,7 +3,7 @@ const {CurrentRole} = require('../../models/dropdownValuesModel.js')
 const Batchmate = require('../../models/Batchmate.js');
 
 //! GET
-// http://localhost:5000/api/current-role-dropdown/ GET
+// http://localhost:5000/api/current-roles/getAllCurrentRoles GET
 
 // exports.getAllCurrentRoles = async (req, res) => {
 //   try {
@@ -33,10 +33,9 @@ const Batchmate = require('../../models/Batchmate.js');
 // http://localhost:5000/api/current-role-dropdown/add POST {"value" : "Dev"}
 
 
-// @desc    Get all current roles
-// @access  Public
+//! Get all current roles
+// http://localhost:5000/api/current-roles/getAllCurrentRoles GET
 
-//fetching the role available from the db
 const getAllCurrentRoles = async (req, res) => {
   try {
     // find({}) fetches all documents in the collection
@@ -173,7 +172,7 @@ const getAllCurrentRoles = async (req, res) => {
   }
 };
 
-//! DELETE a current role by ID
+//! DELETE a current role by ID - route removed
 // http://localhost:5000/api/current-role-dropdown/delete/3 Delete
 exports.deleteCurrentRoleById = async (req, res) => {
   try {
@@ -216,7 +215,7 @@ exports.deleteCurrentRoleById = async (req, res) => {
 };
 
 //! BULK DELETE all current roles
-// http://localhost:5000/api/current-role-dropdown/deleteall 
+// http://localhost:5000/api/current-roles/deleteall 
 
   const deleteAllCurrentRoles = async (req, res) => {
   try {
@@ -272,7 +271,7 @@ exports.deleteCurrentRoleById = async (req, res) => {
 };
 
 //! BULK INSERT all current roles
-// http://localhost:5000/api/current-role-dropdown/bulk-insert/ POST {"value" : ["Dev","value1","value2"]}
+// http://localhost:5000/api/current-roles/insertAllCurrentRoles/ POST {"value" : ["Dev","value1","value2"]}
 
   const insertAllCurrentRoles = async (req, res) => {
   try {
