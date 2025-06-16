@@ -44,17 +44,17 @@ const fieldLabels = {
 };
 
 const dropdownOptions = {
-    current_role: [
-        'Teamcenter Jr Developer', 'Teamcenter Sr Developer', 'Teamcenter SME', 'Polarion Developer', '.NET Developer', 'Java Developer', 'Oracle Agile PLM Developer', 'Oracle Agile PLM SME', 'AWS Developer', 'AWS SME', 'Azure Developer', 'Azure SME',
-        'GCP Developer', 'GCP SME', 'DevOps Developer', 'DevOps SME', 'Automation Developer', 'Others', 'Tester', 'Test lead', 'Teamcenter Admin', 'Teamcenter Support', 'Shift Lead', 'Service Lead', 'CAD Developer',
-        'CAD Designer', 'CAD SME', 'L1.5-Junior', 'L2-Working experience', 'L3 - Strong experience', 'Rulestream Developer', 'Rulestream SME', 'Delivery Lead', 'Project Manager'
-    ],
+    // current_role: [
+    //     'Teamcenter Jr Developer', 'Teamcenter Sr Developer', 'Teamcenter SME', 'Polarion Developer', '.NET Developer', 'Java Developer', 'Oracle Agile PLM Developer', 'Oracle Agile PLM SME', 'AWS Developer', 'AWS SME', 'Azure Developer', 'Azure SME',
+    //     'GCP Developer', 'GCP SME', 'DevOps Developer', 'DevOps SME', 'Automation Developer', 'Others', 'Tester', 'Test lead', 'Teamcenter Admin', 'Teamcenter Support', 'Shift Lead', 'Service Lead', 'CAD Developer',
+    //     'CAD Designer', 'CAD SME', 'L1.5-Junior', 'L2-Working experience', 'L3 - Strong experience', 'Rulestream Developer', 'Rulestream SME', 'Delivery Lead', 'Project Manager'
+    // ],
     industry_knowledge: [
         'Automotive', 'Industrial', 'Aerospace', 'Medical Devices', 'Hitech', 'Resources', 'Consumer Goods', 'None', 'Multiple'
     ],
-    cloud_knowledge: [
-        'Azure', 'AWS', 'GCP', 'multiple'
-    ],
+    // cloud_knowledge: [
+    //     'Azure', 'AWS', 'GCP', 'multiple'
+    // ],
     //newly added fields: start
     development_expertise: ['Teamcenter ITK', 'Teamcenter SOA', 'TC Dispatcher'],
 
@@ -141,6 +141,37 @@ const AddPage = () => {
         2: ['primary_skill', 'additional_skills', 'agile_project', 'plm_development', 'overall_experience', 'industry_knowledge', 'automation_skills', 'cloud_knowledge', 'devops_skills', 'sw_engineering', 'project_management', 'plm_testing', 'plm_support', 'plm_admin', 'plm_upgrade', 'plm_cad_integration', 'plm_interfaceintegration', 'plm_sap_integration', 'tc_manufacturing', 'plmqms_integration', 'plm_functional', 'plm_migration', 'plm_product_configurators', 'active_workspace_customization', 'teamcenter_module_experience'],
         3: ['external_certifications__completed_along_with_completion__expiry_date', 'certifications_in_progress', 'special_call_out']
     };
+    const [dropdownData, setDropdownData] = useState({
+    current_role: [],
+    // work_location:[],
+    cloud_knowledge:[],
+});
+
+useEffect(() => {
+    const fetchDropdowns = async () => {
+        try {
+            const [rolesRes,cloudRes] = await Promise.all([
+                 axios.get(`${API_BASE_URL}/api/current-roles/getAllCurrentRoles`),
+                // axios.get(`${API_BASE_URL}/api/dropdowns/work-locations`),
+                axios.get(`${API_BASE_URL}/api/cloud-knowledge`)
+                // axios.get(`${API_BASE_URL}/api/dropdowns/projects`)
+            ]);
+
+            setDropdownData(prev=>({
+                ...prev,
+                current_role: rolesRes.data,
+                // work_location: locationsRes.data,
+                cloud_knowledge: cloudRes.data,
+                // project: projectsRes.data,
+            }));
+        } catch (err) {
+            console.error("Error fetching dropdown data:", err);
+        }
+    };
+
+    fetchDropdowns();
+}, []);
+
 
     useEffect(() => {
         if (stepChanging) {
@@ -249,19 +280,20 @@ const AddPage = () => {
     const renderField = (name) => (
         <div key={name} style={{ marginBottom: '15px' }}>
             <label style={{ display: 'block', marginBottom: '5px' }}>{fieldLabels[name]}</label>
-            {dropdownOptions[name] ? (
-                <select
-                    name={name}
-                    value={formData[name]}
-                    onChange={handleChange}
-                    style={{ width: '99%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
-                    disabled={submitting || stepChanging}
-                >
-                    <option value="">Select...</option>
-                    {dropdownOptions[name].map((opt) => (
-                        <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                </select>
+            {dropdownData[name] && dropdownData[name].length > 0 ? (
+    <select
+        name={name}
+        value={formData[name]}
+        onChange={handleChange}
+        style={{ width: '99%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
+        disabled={submitting || stepChanging}
+    >
+        <option value="">Select...</option>
+        {dropdownData[name].map((opt) => (
+            <option key={opt.id} value={opt.value}>{opt.value}</option>
+        ))}
+    </select>
+
             ) : (
                 <input
                     type={name === 'email_address' ? 'email' : 'text'}
