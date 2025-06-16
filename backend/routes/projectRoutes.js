@@ -5,7 +5,8 @@ const {
   getAllProjects,
   addProject,
   deleteProjectById,
-  deleteAllProjects
+  deleteAllProjects,
+  insertAllProjects
 } = require('../controllers/dropDownValuesController/projectController');
 
 
@@ -19,5 +20,7 @@ router.delete('/delete/:id', deleteProjectById);
 
 
 router.delete('/deleteall', deleteAllProjects);
+
+router.post('/bulk-insert', insertAllProjects);
 
 module.exports = router;

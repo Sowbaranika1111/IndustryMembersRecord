@@ -93,10 +93,62 @@ const deleteAllProjects = async (req, res) => {
   }
 };
 
+//bult-insert
+const insertAllProjects = async (req, res) => {
+  try {
+    const { values } = req.body;
+
+    if (!Array.isArray(values) || values.length === 0) {
+      return res.status(400).json({
+        error: "Values must be a non-empty array.",
+        success: false
+      });
+    }
+
+    const cleanedValues = [...new Set(values.map(v => v.trim().toLowerCase()).filter(Boolean))];
+
+    const existingProjects = await Project.find({
+      value: { $in: cleanedValues }
+    });
+
+    const existingValues = existingProjects.map(p => p.value);
+    const newValues = cleanedValues.filter(v => !existingValues.includes(v));
+
+    if (newValues.length === 0) {
+      return res.status(200).json({
+        message: "All values already exist.",
+        inserted: 0,
+        alreadyExists: existingValues.length
+      });
+    }
+
+    const last = await Project.findOne().sort({ id: -1 });
+    let nextId = last ? last.id + 1 : 1;
+
+    const docs = newValues.map(val => ({
+      id: nextId++,
+      value: val
+    }));
+
+    const inserted = await Project.insertMany(docs);
+
+    res.status(201).json({
+      message: `Inserted ${inserted.length} new project values.`,
+      insertedValues: inserted.map(i => i.value),
+      inserted: inserted.length,
+      alreadyExists: existingValues.length
+    });
+
+  } catch (err) {
+    console.error("Error in bulk insert:", err);
+    res.status(500).json({ error: "Bulk insert failed", success: false });
+  }
+};
 
 module.exports = {
   getAllProjects,
   addProject,
   deleteProjectById,
-  deleteAllProjects
+  deleteAllProjects,
+  insertAllProjects
 };

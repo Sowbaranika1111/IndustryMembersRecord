@@ -76,6 +76,11 @@ app.use("/api/cloud-knowledge", cloudKnowledgeRoutes);
 const projectRoutes = require('./routes/projectRoutes');
 app.use('/api/project-dropdown', projectRoutes);
 
+//devops skills
+const devopsSkillsRoutes = require("./routes/devopsSkillsRoutes");
+app.use("/api/devops-skills", devopsSkillsRoutes);
+
+
 
 //! Login Admin Routes
 

@@ -27,20 +27,22 @@ const workLocationSchema = new mongoose.Schema({
 //cloud-knowledge Schema
 const cloudKnowledgeSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
-  value: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true,
-  },
+  value: { type: String, required: true, unique: true, lowercase: true, trim: true }
 });
+
 
 //Project Schema
 
 const projectSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
-  value: { type: String, required: true, unique: true, lowercase: true },
+  value: { type: String, required: true, unique: true ,lowercase: true},
+
+});
+
+// DevOps Skills Schema
+const devopsSkillsSchema = new mongoose.Schema({
+  id: { type: Number, required: true, unique: true },
+  value: { type: String, required: true, unique: true, lowercase: true, trim: true }
 });
 
 // Industry Knowledge Schema
@@ -57,5 +59,6 @@ const projectSchema = new mongoose.Schema({
     CloudKnowledge:mongoose.model('CloudKnowledge', cloudKnowledgeSchema),
     Project: mongoose.model('Project', projectSchema),
     Designation:mongoose.model('Designation',designationSchema),
+    DevopsSkill:mongoose.model("DevopsSkill", devopsSkillsSchema),
     // IndustryKnowledge: mongoose.model("IndustryKnowledge", industryKnowledgeSchema),
   };
