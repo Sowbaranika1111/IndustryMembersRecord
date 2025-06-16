@@ -32,7 +32,7 @@ app.use(session({
 }));
 
 // API Routes
-app.use("/api/login", loginRoutes);
+// app.use("/api/login", loginRoutes);
 
 // Database Connection
 mongoose
@@ -55,13 +55,18 @@ app.use('/api/batchmates', batchmateRoutes);
 
 //!dropdown values from mongodb routes
 
+//current Role
 const currentRoleRoutes = require('./routes/currentRoleRoutes.js');
-// const industryKnowledgeRoutes = require("./routes/industryKnowledgeRoutes.js");
-
-app.use('/api/current-roles/', currentRoleRoutes);
-// app.use("/api/indus-know-dropdown/", industryKnowledgeRoutes);
+app.use('/api/current-role/', currentRoleRoutes);
+//workLocation
 const workLocationRoutes = require('./routes/workLocationRoutes.js')
 app.use('/api/work-location/', workLocationRoutes);
+//Designation
+const designationRoutes = require('./routes/designationRoutes.js');
+app.use('/api/designation/',designationRoutes);
+
+
+
 //cloud-knowledge
 const cloudKnowledgeRoutes = require("./routes/cloudKnowledgeRoutes");
 app.use("/api/cloud-knowledge", cloudKnowledgeRoutes);

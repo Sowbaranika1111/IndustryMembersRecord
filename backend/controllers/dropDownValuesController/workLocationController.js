@@ -65,8 +65,79 @@ const updateWorkLocation = async (req, res) => {
   }
 };
 
+  const getAllWorkLocations = async (req, res) => {
+  try {
+    // 1. Call your database logic to fetch the data
+    const locations = await WorkLocation.find({});
 
+    // 2. Check if any locations were found (optional but good practice)
+    if (!locations || locations.length === 0) {
+      // Respond with 404 Not Found if the collection is empty
+      return res.status(404).json({
+        success: false,
+        message: "No work locations found",
+      });
+    }
+
+    // 3. Send a SUCCESS response
+    // Status 200 means OK.
+    // We send a JSON object containing the data.
+    res.status(200).json({
+      success: true,
+      count: locations.length,
+      data: locations,
+    });
+
+  } catch (error) {
+    // 4. If any error occurs in the 'try' block, this 'catch' block will run
+    console.error("Server Error in getAllWorkLocationsHandler:", error);
+
+    // 5. Send an ERROR response
+    // Status 500 means Internal Server Error.
+    // We send a generic error message to the client for security.
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
+//for deleting all the worklocations 
+
+const deleteAllWorkLocations = async (req, res) => {
+  try {
+    // 1. Call your database logic to delete all documents in the collection
+    // The result object contains information like `deletedCount`.
+    const result = await WorkLocation.deleteMany({});
+
+    // 2. Check how many documents were deleted
+    if (result.deletedCount === 0) {
+      // This isn't an error, but it means the collection was already empty.
+      return res.status(200).json({
+        success: true,
+        message: "No work locations to delete. The collection was already empty.",
+        deletedCount: 0,
+      });
+    }
+
+    // 3. Send a SUCCESS response confirming the deletion
+    res.status(200).json({
+      success: true,
+      message: `Successfully deleted all ${result.deletedCount} work locations.`,
+      deletedCount: result.deletedCount,
+    });
+
+  } catch (error) {
+    // 4. If any error occurs, this 'catch' block will run
+    console.error("Server Error in deleteAllWorkLocations:", error);
+
+    // 5. Send an ERROR response
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+    });
+  }
+};
 
 module.exports = {
-  updateWorkLocation,
+  updateWorkLocation,getAllWorkLocations,deleteAllWorkLocations,
 };

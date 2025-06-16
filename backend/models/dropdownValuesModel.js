@@ -13,6 +13,17 @@
     value: { type: String, required: true },
   });
 
+  const designationSchema = new mongoose.Schema({
+  
+  id: {
+    type: Number, required: [true, 'A designation ID is required.'],unique: true},
+  value: {type: String,required: true }
+});
+
+
+
+
+
   //cloud-knowledge Schema
 const cloudKnowledgeSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },
@@ -41,5 +52,6 @@ const projectSchema = new mongoose.Schema({
     WorkLocation: mongoose.model("WorkLocation", workLocationSchema),
     CloudKnowledge:mongoose.model('CloudKnowledge', cloudKnowledgeSchema),
     Project: mongoose.model('Project', projectSchema),
+    Designation:mongoose.model('Designation',designationSchema),
     // IndustryKnowledge: mongoose.model("IndustryKnowledge", industryKnowledgeSchema),
   };
