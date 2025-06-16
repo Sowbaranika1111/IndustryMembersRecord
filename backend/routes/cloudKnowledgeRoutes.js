@@ -5,8 +5,9 @@ const {
   getAllCloudKnowledge,
   addCloudKnowledge,
   deleteCloudKnowledgeById,
-  deleteAllCloudKnowledge
-} = require("../controllers/dropDownValuesController/cloudKnowledgeController");
+  deleteAllCloudKnowledge,
+  insertAllCloudKnowledge,
+} = require("../controllers/dropDownValuesController/cloudKnowledgeController.js");
 
 // GET all cloud knowledge values
 router.get("/", getAllCloudKnowledge);
@@ -20,4 +21,6 @@ router.delete("/delete/:id", deleteCloudKnowledgeById);
 // DELETE all cloud knowledge
 router.delete("/deleteall", deleteAllCloudKnowledge);
 
+//Bulk insert all cloud knowledge
+router.post("/insertAllCloudKnowledge", insertAllCloudKnowledge);
 module.exports = router;

@@ -1,4 +1,5 @@
 // backend/importExcel.js
+require("dotenv").config(); 
 const mongoose = require('mongoose');
 const xlsx = require('xlsx');
 const path = require('path');
@@ -6,6 +7,7 @@ const Batchmate = require('./models/Batchmate');
 
 const filePath = path.resolve(__dirname, 'excel', 'IX_DS_Engineering_Resource_Skill_Matrix 1.xlsx');
 const TARGET_SHEET_NAME = 'Resource';
+const MONGO_URI = process.env.MONGO_URI;
 
 function transformKey(key) {
   if (typeof key !== 'string') {
@@ -18,7 +20,7 @@ function transformKey(key) {
     .replace(/[^a-z0-9_]/g, '');
 }
 
-mongoose.connect('mongodb://127.0.0.1:27017/batchmates_db', {
+mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => {
