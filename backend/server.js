@@ -32,7 +32,7 @@ app.use(session({
 }));
 
 // API Routes
-// app.use("/api/login", loginRoutes);
+app.use("/api/login", loginRoutes);
 
 // Database Connection
 mongoose
