@@ -19,8 +19,8 @@ router.post('/add', addProject);
 router.delete('/delete/:id', deleteProjectById);
 
 
-router.delete('/deleteall', deleteAllProjects);
+router.delete('/delete-all', deleteAllProjects);
 
-router.post('/bulk-insert', insertAllProjects);
+router.post('/insert-many', insertAllProjects);
 
 module.exports = router;

@@ -74,7 +74,7 @@ app.use("/api/cloud-knowledge", cloudKnowledgeRoutes);
 
 //project
 const projectRoutes = require('./routes/projectRoutes');
-app.use('/api/project-dropdown', projectRoutes);
+app.use('/api/project', projectRoutes);
 
 //devops skills
 const devopsSkillsRoutes = require("./routes/devopsSkillsRoutes");

@@ -19,10 +19,10 @@ router.post("/add", addCloudKnowledge);
 router.delete("/delete/:id", deleteCloudKnowledgeById);
 
 // DELETE all cloud knowledge
-router.delete("/deleteall", deleteAllCloudKnowledge);
+router.delete("/delete-all", deleteAllCloudKnowledge);
 
 //bulk-insert
-router.post('/bulk-insert',bulkInsertCloudKnowledge);
+router.post('/insert-many',bulkInsertCloudKnowledge);
 
 
 module.exports = router;
