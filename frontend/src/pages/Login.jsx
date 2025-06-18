@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 
 // Configure axios to send cookies with every request
 const api = axios.create({
@@ -17,6 +18,7 @@ const Login = () => {
     const [loading, setLoading] = useState(false); // For UX feedback
     
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleIdSubmit = async (event) => {
         event.preventDefault();
@@ -49,9 +51,9 @@ const Login = () => {
         try {
             const response = await api.post('/login/verify-otp', { enterpriseId, otp });
             
-            // Role-based navigation logic
             if (response.data.success) {
                 const user = response.data.user;
+                login(user); // Store user data in AuthContext
 
                 if (user.role === 'admin') {
                     // If user is an admin, navigate to the main search/dashboard page
