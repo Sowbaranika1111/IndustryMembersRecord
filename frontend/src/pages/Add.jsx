@@ -151,7 +151,7 @@ useEffect(() => {
     const fetchDropdowns = async () => {
         try {
             const [rolesRes,cloudRes] = await Promise.all([
-                 axios.get(`${API_BASE_URL}/api/current-roles/getAllCurrentRoles`),
+                 axios.get(`${API_BASE_URL}/api/current-role/getAllCurrentRoles`),
                 // axios.get(`${API_BASE_URL}/api/dropdowns/work-locations`),
                 axios.get(`${API_BASE_URL}/api/cloud-knowledge`)
                 // axios.get(`${API_BASE_URL}/api/dropdowns/projects`)

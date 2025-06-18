@@ -71,6 +71,14 @@ app.use('/api/designation/',designationRoutes);
 const cloudKnowledgeRoutes = require("./routes/cloudKnowledgeRoutes");
 app.use("/api/cloud-knowledge", cloudKnowledgeRoutes);
 
+// plm-dev-expertise
+const plmDevExpertise = require("./routes/plmDevExpertiseRoutes.js")
+app.use("/api/plm-dev-expertise",plmDevExpertise);
+
+
+//plm-Admin-expertise
+const plmAdminExpertise = require("./routes/plmAdminExpertiseRoutes.js")
+app.use("/api/plm-admin-expertise", plmAdminExpertise);
 
 //project
 const projectRoutes = require('./routes/projectRoutes');
