@@ -85,6 +85,7 @@ exports.verifyOtpAndLogin = async (req, res) => {
       email: user.email_address,
       name: user.name,
       role: user.role,
+      enterpriseId: enterpriseId.trim().toLowerCase()
     };
  
     res.status(200).json({
@@ -95,6 +96,7 @@ exports.verifyOtpAndLogin = async (req, res) => {
         email: user.email_address,
         name: user.name,
         role: user.role,
+        enterpriseId: enterpriseId.trim().toLowerCase()
       },
     });
   } catch (error) {
@@ -110,7 +112,10 @@ exports.checkAuth = async (req, res) => {
   if (req.session.user) {
     res.status(200).json({
       isAuthenticated: true,
-      user: req.session.user,
+      user: {
+        ...req.session.user,
+        enterpriseId: req.session.user.email.split('@')[0]
+      }
     });
   } else {
     res.status(401).json({ isAuthenticated: false });
