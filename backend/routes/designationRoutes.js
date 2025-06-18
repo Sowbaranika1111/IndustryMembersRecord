@@ -5,26 +5,17 @@ const {
   getAllDesignations,
   deleteAllDesignations,
   insertAllDesignations,
-  // addNewCurrentRole,
-  // deleteCurrentRoleById,
-  // deleteAllCurrentRoles,
-  // insertAllCurrentRoles,
+
 } = require("../controllers/dropDownValuesController/designationController");
 
-// GET existing current_role values
-router.get("/getAllDesignations",getAllDesignations);
-router.put("/updateDesignation/:id",updateDesignation); 
-
-// POST new current_role
-// router.post("/add", addNewCurrentRole);
+router.get("/",getAllDesignations);
+router.put("/update/:id",updateDesignation); 
 
 // DELETE current_role by ID
 // router.delete("/delete/:id", deleteCurrentRoleById);
 
-// DELETE all roles at a time
-router.delete("/deleteAllDesignations", deleteAllDesignations);
+router.delete("/delete-all", deleteAllDesignations);
 
-// BULK insert roles
-router.post("/insertAllDesignations", insertAllDesignations);
+router.post("/insert-many", insertAllDesignations);
 
 module.exports = router;
