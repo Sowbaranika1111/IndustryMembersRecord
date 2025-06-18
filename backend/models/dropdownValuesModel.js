@@ -23,6 +23,8 @@ const currentRoleSchema = new mongoose.Schema({
 
 
 
+
+
 //work location schema
 
 const workLocationSchema = new mongoose.Schema({
@@ -36,6 +38,7 @@ const workLocationSchema = new mongoose.Schema({
   timestamps: true, // Automatically adds createdAt and updatedAt.
 });
 
+//designation schema
   const designationSchema = new mongoose.Schema({
  value: {
     type: String,
@@ -46,6 +49,42 @@ const workLocationSchema = new mongoose.Schema({
 }, {
   timestamps: true, // Automatically adds createdAt and updatedAt.
 });
+
+// PLM Development Schema
+const plmDevelopmentExpertiseSchema = new mongoose.Schema({
+  // The manual 'id' field is GONE. This is the fix.
+  // We rely on MongoDB's automatic _id.
+
+  value: {
+    type: String,
+    required: true,
+    unique: true,   // A database-level rule to prevent duplicate role names.
+    trim: true,
+  },
+}, {
+  timestamps: true, // Automatically adds createdAt and updatedAt.
+});
+
+//PLM Admin Expertise Schema
+
+const plmAdminExpertiseSchema = new mongoose.Schema({
+  // The manual 'id' field is GONE. This is the fix.
+  // We rely on MongoDB's automatic _id.
+
+  value: {
+    type: String,
+    required: true,
+    unique: true,   // A database-level rule to prevent duplicate role names.
+    trim: true,
+  },
+}, {
+  timestamps: true, // Automatically adds createdAt and updatedAt.
+});
+
+
+
+
+
 
 
 
@@ -87,5 +126,7 @@ const devopsSkillsSchema = new mongoose.Schema({
     Project: mongoose.model('Project', projectSchema),
     Designation:mongoose.model('Designation',designationSchema),
     DevopsSkill:mongoose.model("DevopsSkill", devopsSkillsSchema),
+    PLMDevelopmentExpertise:mongoose.model("PLMDevelopmentExpertise",plmDevelopmentExpertiseSchema),
+    PLMAdminExpertise:mongoose.model("PLMAdminExpertise", plmAdminExpertiseSchema),
     // IndustryKnowledge: mongoose.model("IndustryKnowledge", industryKnowledgeSchema),
   };
