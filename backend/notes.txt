@@ -1,0 +1,45 @@
+Current Role
+
+get all -working
+http://localhost:5000/api/current-role/getAllCurrentRoles
+
+delete all  -working
+http://localhost:5000/api/current-roles/deleteAllCurrentRoles
+
+insert all - prblm in current role bulk insert controller - duplicate key
+http://localhost:5000/api/current-roles/insertAllCurrentRoles , json-["ab","bf","x"]
+{
+  "error": "Duplicate key error: One or more values already exist.",
+  "success": false
+}
+---------------------------------------------------------------------------
+Cloud knowledge
+
+insert all - working
+http://localhost:5000/api/cloud-knowledge/insertAllCloudKnowledge
+{"values": ["Azure", "AWS", "GCP", "multiple"] }
+  
+delete all - values are prsent but it throws error
+http://localhost:5000/api/cloud-knowledge/deleteAll
+
+error:
+"message": "No cloud knowledge records found to delete.",
+
+----------------------------------------------------------------------
+
+Projects - working well
+
+get all
+http://localhost:5000/api/project-dropdown/
+
+add one
+http://localhost:5000/api/project-dropdown/add
+
+delete all
+http://localhost:5000/api/project-dropdown/deleteall
+
+update one
+code needed
+
+insert many 
+code needed

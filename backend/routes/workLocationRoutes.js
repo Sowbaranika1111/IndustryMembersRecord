@@ -8,16 +8,12 @@ const {
   deleteAllWorkLocations,
   insertAllWorkLocations,
   
-  // addNewCurrentRole,
-  // deleteCurrentRoleById,
-  // deleteAllCurrentRoles,
-  // insertAllCurrentRoles,
 } = require("../controllers/dropDownValuesController/workLocationController");
 
 
-router.put("/updateWorkLocation/:id", updateWorkLocation); 
-router.get("/getAllWorkLocations",getAllWorkLocations);
-router.delete("/deleteAllWorkLocations",deleteAllWorkLocations);
-router.post("/insertAllWorkLocations", insertAllWorkLocations);
+router.put("/update/:id", updateWorkLocation); 
+router.get("/",getAllWorkLocations);
+router.delete("/delete-all",deleteAllWorkLocations);
+router.post("/insert-many", insertAllWorkLocations);
 
 module.exports = router;
