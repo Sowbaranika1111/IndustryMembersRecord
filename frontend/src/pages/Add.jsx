@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; // Import useEffect
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -8,12 +8,14 @@ const API_BASE_URL = 'http://localhost:5000';
 const fieldLabels = {
     name: 'Name',
     email_address: 'Email Address',
+    enterprise_id: 'Enterprise-id',
     management_level: 'Management Level',
     work_location: 'Work Location',
     project: 'Project',
-    job_profile: 'Job Profile',
+    designation: 'Designation',
     current_role: 'Current Role',
-    overall_experience: 'Overall Experience',
+    overall_experience_years: 'Overall Experience (Years)',
+    overall_experience_months: 'Overall Experience (Months)',
     primary_skill: 'Primary Skill',
     additional_skills: 'Additional Skills',
     agile_project: 'Agile Project',
@@ -27,6 +29,7 @@ const fieldLabels = {
     plm_testing: 'PLM Testing',
     plm_support: 'PLM Support',
     plm_admin: 'PLM Admin',
+    plm_admin_expertise: 'PLM Admin Expertise', // Keep this label
     plm_upgrade: 'PLM Upgrade',
     plm_cad_integration: 'PLM CAD Integration',
     plm_interfaceintegration: 'PLM Interface/Integration',
@@ -44,21 +47,13 @@ const fieldLabels = {
 };
 
 const dropdownOptions = {
-    // current_role: [
-    //     'Teamcenter Jr Developer', 'Teamcenter Sr Developer', 'Teamcenter SME', 'Polarion Developer', '.NET Developer', 'Java Developer', 'Oracle Agile PLM Developer', 'Oracle Agile PLM SME', 'AWS Developer', 'AWS SME', 'Azure Developer', 'Azure SME',
-    //     'GCP Developer', 'GCP SME', 'DevOps Developer', 'DevOps SME', 'Automation Developer', 'Others', 'Tester', 'Test lead', 'Teamcenter Admin', 'Teamcenter Support', 'Shift Lead', 'Service Lead', 'CAD Developer',
-    //     'CAD Designer', 'CAD SME', 'L1.5-Junior', 'L2-Working experience', 'L3 - Strong experience', 'Rulestream Developer', 'Rulestream SME', 'Delivery Lead', 'Project Manager'
-    // ],
+    management_level: Array.from({ length: 9 }, (_, i) => (i + 5).toString()),
     industry_knowledge: [
         'Automotive', 'Industrial', 'Aerospace', 'Medical Devices', 'Hitech', 'Resources', 'Consumer Goods', 'None', 'Multiple'
     ],
-    // cloud_knowledge: [
-    //     'Azure', 'AWS', 'GCP', 'multiple'
-    // ],
-    //newly added fields: start
+    overall_experience_years: Array.from({ length: 31 }, (_, i) => i.toString()), // 0 to 30 years
+    overall_experience_months: Array.from({ length: 12 }, (_, i) => i.toString()), // 0 to 11 months
     development_expertise: ['Teamcenter ITK', 'Teamcenter SOA', 'TC Dispatcher'],
-
-    //end
     agile_project: ['<1', '1-2 yr', '2-5 yr', '5-8 yr', '8+ yr', 'Awareness', 'None'],
     plm_development: ['<1', '1-2 yr', '2-5 yr', '5-8 yr', '8+ yr', 'Awareness', 'None'],
     plm_testing: ['<1', '1-2 yr', '2-5 yr', '5-8 yr', '8+ yr', 'Awareness', 'None'],
@@ -77,15 +72,26 @@ const dropdownOptions = {
     active_workspace_customization: ['<1', '1-2 yr', '2-5 yr', '5-8 yr', '8+ yr', 'Awareness', 'None'],
 };
 
+// Hardcoded PLM Admin Expertise options from your provided data
+const plmAdminExpertiseOptionsData = [
+    "BMIDE (Business Modeler IDE)",
+    "Structure Manager",
+    "Workflow Designer",
+    "Access Manager",
+    "Change Management"
+];
+
 const frontendToBackendKeyMap = {
     name: 'name',
     email_address: 'email_address',
+    enterprise_id: 'enterpriseid',
     management_level: 'management_level',
     work_location: 'work_location',
     project: 'project',
-    job_profile: 'job_profile', 
+    designation: 'designation',
     current_role: 'current_role',
-    overall_experience: 'overall_experience',
+    overall_experience_years: 'overall_experience_years',
+    overall_experience_months: 'overall_experience_months',
     primary_skill: 'primary_skill',
     additional_skills: 'additional_skills',
     agile_project: 'agile_project',
@@ -96,13 +102,14 @@ const frontendToBackendKeyMap = {
     cloud_knowledge: 'cloud_knowledge',
     sw_engineering: 'sw_engineering',
     project_management: 'project_management',
-    plm_testing: 'plm_testing', 
+    plm_testing: 'plm_testing',
     plm_support: 'plm_support',
     plm_admin: 'plm_admin',
+    plm_admin_expertise: 'plm_admin_expertise',
     plm_upgrade: 'plm_upgrade',
     plm_cad_integration: 'plm_cad_integration',
-    plm_interfaceintegration: 'plm_interfaceintegration', 
-    plm_sap_integration: 'plm_sap_integration', 
+    plm_interfaceintegration: 'plm_interfaceintegration',
+    plm_sap_integration: 'plm_sap_integration',
     tc_manufacturing: 'tc_manufacturing',
     plmqms_integration: 'plmqms_integration',
     plm_functional: 'plm_functional',
@@ -126,6 +133,7 @@ const transformDataForBackend = (frontendData) => {
     }
     return backendData;
 }
+
 const AddPage = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
@@ -137,41 +145,69 @@ const AddPage = () => {
     const [stepChanging, setStepChanging] = useState(false);
 
     const stepFields = {
-        1: ['name', 'email_address', 'management_level', 'work_location', 'project', 'job_profile', 'current_role'],
-        2: ['primary_skill', 'additional_skills', 'agile_project', 'plm_development', 'overall_experience', 'industry_knowledge', 'automation_skills', 'cloud_knowledge', 'devops_skills', 'sw_engineering', 'project_management', 'plm_testing', 'plm_support', 'plm_admin', 'plm_upgrade', 'plm_cad_integration', 'plm_interfaceintegration', 'plm_sap_integration', 'tc_manufacturing', 'plmqms_integration', 'plm_functional', 'plm_migration', 'plm_product_configurators', 'active_workspace_customization', 'teamcenter_module_experience'],
+        1: ['name', 'email_address', 'enterprise_id', 'management_level', 'work_location', 'project', 'designation', 'current_role'],
+        2: ['overall_experience_years', 'overall_experience_months', 'primary_skill', 'additional_skills', 'agile_project', 'plm_development', 'industry_knowledge', 'automation_skills', 'cloud_knowledge', 'devops_skills', 'sw_engineering', 'project_management', 'plm_testing', 'plm_support', 'plm_admin', 'plm_upgrade', 'plm_cad_integration', 'plm_interfaceintegration', 'plm_sap_integration', 'tc_manufacturing', 'plmqms_integration', 'plm_functional', 'plm_migration', 'plm_product_configurators', 'active_workspace_customization', 'teamcenter_module_experience'],
         3: ['external_certifications__completed_along_with_completion__expiry_date', 'certifications_in_progress', 'special_call_out']
     };
     const [dropdownData, setDropdownData] = useState({
-    current_role: [],
-    // work_location:[],
-    cloud_knowledge:[],
-});
+        current_role: [],
+        work_location: [],
+        cloud_knowledge: [],
+        project: [],
+        designation: []
+    });
 
-useEffect(() => {
-    const fetchDropdowns = async () => {
-        try {
-            const [rolesRes,cloudRes] = await Promise.all([
-                 axios.get(`${API_BASE_URL}/api/current-role/getAllCurrentRoles`),
-                // axios.get(`${API_BASE_URL}/api/dropdowns/work-locations`),
-                axios.get(`${API_BASE_URL}/api/cloud-knowledge`)
-                // axios.get(`${API_BASE_URL}/api/dropdowns/projects`)
-            ]);
+    // We no longer need a state for plmAdminExpertiseOptions as it's hardcoded
+    // const [plmAdminExpertiseOptions, setPlmAdminExpertiseOptions] = useState([]);
 
-            setDropdownData(prev=>({
-                ...prev,
-                current_role: rolesRes.data,
-                // work_location: locationsRes.data,
-                cloud_knowledge: cloudRes.data,
-                // project: projectsRes.data,
-            }));
-        } catch (err) {
-            console.error("Error fetching dropdown data:", err);
+    useEffect(() => {
+        const fetchDropdowns = async () => {
+            try {
+                const [rolesRes, cloudRes, locationsRes, projectsRes, designationRes] = await Promise.all([
+                    axios.get(`${API_BASE_URL}/api/current-role/getAllCurrentRoles`),
+                    axios.get(`${API_BASE_URL}/api/cloud-knowledge`),
+                    axios.get(`${API_BASE_URL}/api/work-location/getAllWorkLocations`),
+                    axios.get(`${API_BASE_URL}/api/project-dropdown/`),
+                    axios.get(`${API_BASE_URL}/api/designation/getAllDesignations`)
+                ]);
+
+                setDropdownData(prev => ({
+                    ...prev,
+                    current_role: rolesRes.data,
+                    cloud_knowledge: cloudRes.data,
+                    work_location: locationsRes.data,
+                    project: projectsRes.data,
+                    designation: designationRes.data
+                }));
+            } catch (err) {
+                console.error("Error fetching dropdown data:", err);
+            }
+        };
+
+        fetchDropdowns();
+    }, []);
+
+    // REMOVED: The useEffect hook that fetched plmAdminExpertiseOptions from the backend.
+    /*
+    useEffect(() => {
+        const fetchPlmAdminExpertise = async () => {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/api/plm-admin-expertise/getAllExpertise`);
+                console.log("PLM Admin Expertise fetched:", response.data);
+                setPlmAdminExpertiseOptions(response.data);
+            } catch (err) {
+                console.error("Error fetching PLM Admin Expertise options:", err);
+            }
+        };
+
+        if (formData.plm_admin && formData.plm_admin !== 'None') {
+            fetchPlmAdminExpertise();
+        } else {
+            setFormData(prev => ({ ...prev, plm_admin_expertise: '' }));
+            setPlmAdminExpertiseOptions([]);
         }
-    };
-
-    fetchDropdowns();
-}, []);
-
+    }, [formData.plm_admin]);
+    */
 
     useEffect(() => {
         if (stepChanging) {
@@ -194,7 +230,7 @@ useEffect(() => {
         setStepChanging(true);
 
         if (step === 1) {
-            const step1MandatoryKeys = ['name', 'email_address', 'management_level', 'work_location', 'project', 'job_profile'];
+            const step1MandatoryKeys = ['name', 'email_address', 'enterprise_id', 'management_level', 'work_location', 'project'];
             for (const fieldKey of step1MandatoryKeys) {
                 if (!formData[fieldKey] || String(formData[fieldKey]).trim() === '') {
                     alert(`${fieldLabels[fieldKey]} is required to proceed to the next section.`);
@@ -203,10 +239,13 @@ useEffect(() => {
                 }
             }
         } else if (step === 2) {
-            if (!formData.primary_skill || String(formData.primary_skill).trim() === '') {
-                alert(`${fieldLabels.primary_skill} is required to proceed to the next section.`);
-                setStepChanging(false);
-                return;
+            const step2MandatoryKeys = ['overall_experience_years', 'overall_experience_months', 'primary_skill'];
+            for (const fieldKey of step2MandatoryKeys) {
+                if (!formData[fieldKey] || String(formData[fieldKey]).trim() === '') {
+                    alert(`${fieldLabels[fieldKey]} is required to proceed to the next section.`);
+                    setStepChanging(false);
+                    return;
+                }
             }
         }
         setStep((prev) => prev + 1);
@@ -230,10 +269,12 @@ useEffect(() => {
         setSubmitStatus({ message: '', type: '' });
 
         const schemaRequiredFrontendKeys = {
-            'name': 'Name', 'email_address': 'Email Address', 'primary_skill': 'Primary Skill',
+            'name': 'Name', 'email_address': 'Email Address', 'enterprise_id': 'Enterprise-id', 'primary_skill': 'Primary Skill',
             'additional_skills': 'Additional Skills', 'management_level': 'Management Level',
-            'work_location': 'Work Location', 'project': 'Project',
-            'overall_experience': 'Overall Experience', 'current_role': 'Current Role'
+            'work_location': 'Work Location', 'project': 'Project', 'designation': 'Designation',
+            'overall_experience_years': 'Overall Experience (Years)',
+            'overall_experience_months': 'Overall Experience (Months)',
+            'current_role': 'Current Role'
         };
 
         for (const feKey in schemaRequiredFrontendKeys) {
@@ -277,35 +318,71 @@ useEffect(() => {
         }
     };
 
-    const renderField = (name) => (
-        <div key={name} style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px' }}>{fieldLabels[name]}</label>
-            {dropdownData[name] && dropdownData[name].length > 0 ? (
-    <select
-        name={name}
-        value={formData[name]}
-        onChange={handleChange}
-        style={{ width: '99%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
-        disabled={submitting || stepChanging}
-    >
-        <option value="">Select...</option>
-        {dropdownData[name].map((opt) => (
-            <option key={opt.id} value={opt.value}>{opt.value}</option>
-        ))}
-    </select>
+    const renderField = (name) => {
+        const apiOptions = dropdownData[name];
+        const localOptions = dropdownOptions[name];
 
-            ) : (
-                <input
-                    type={name === 'email_address' ? 'email' : 'text'}
-                    name={name}
-                    value={formData[name]}
-                    onChange={handleChange}
-                    style={{ width: '95%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
-                    disabled={submitting || stepChanging}
-                />
-            )}
-        </div>
-    );
+        let optionsToRender = [];
+        let isApiDropdown = false;
+
+        if (apiOptions && apiOptions.length > 0) {
+            optionsToRender = apiOptions;
+            isApiDropdown = true;
+        } else if (localOptions && localOptions.length > 0) {
+            optionsToRender = localOptions;
+            isApiDropdown = false;
+        }
+
+        return (
+            <div key={name} style={{ marginBottom: '15px' }}>
+                <label style={{ display: 'block', marginBottom: '5px' }}>{fieldLabels[name]}</label>
+                {optionsToRender.length > 0 ? (
+                    <select
+                        name={name}
+                        value={formData[name]}
+                        onChange={handleChange}
+                        style={{ width: '99%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
+                        disabled={submitting || stepChanging}
+                    >
+                        <option value="">Select...</option>
+                        {optionsToRender.map((opt, index) => {
+                            let optionKey;
+                            let optionValue;
+                            let optionDisplay;
+
+                            if (isApiDropdown) {
+                                // For API dropdowns like current_role, work_location, etc.
+                                // Assuming they have _id, id, name, or value properties
+                                optionKey = opt._id || opt.id || JSON.stringify(opt) + index;
+                                optionValue = opt.name || opt.value || ''; // Ensure a fallback for value
+                                optionDisplay = opt.name || opt.value || ''; // Ensure a fallback for display
+                            } else {
+                                // For local dropdowns (simple arrays of strings)
+                                optionKey = opt;
+                                optionValue = opt;
+                                optionDisplay = opt;
+                            }
+
+                            return (
+                                <option key={optionKey} value={optionValue}>
+                                    {optionDisplay}
+                                </option>
+                            );
+                        })}
+                    </select>
+                ) : (
+                    <input
+                        type={name === 'email_address' ? 'email' : 'text'}
+                        name={name}
+                        value={formData[name]}
+                        onChange={handleChange}
+                        style={{ width: '95%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
+                        disabled={submitting || stepChanging}
+                    />
+                )}
+            </div>
+        );
+    };
 
     return (
         <div style={{ maxWidth: '700px', margin: 'auto', padding: '20px', color: '#000' }}>
@@ -350,7 +427,32 @@ useEffect(() => {
                     </div>
                 )}
 
-                {stepFields[step].map(renderField)}
+                {stepFields[step].map(fieldName => (
+                    <React.Fragment key={fieldName}>
+                        {renderField(fieldName)}
+                        {/* Render PLM Admin Expertise dropdown separately if plm_admin is selected and not 'None' */}
+                        {fieldName === 'plm_admin' && formData.plm_admin && formData.plm_admin !== 'None' && (
+                            <div style={{ marginBottom: '15px', marginTop: '15px' }}>
+                                <label style={{ display: 'block', marginBottom: '5px' }}>{fieldLabels['plm_admin_expertise']}</label>
+                                <select
+                                    name="plm_admin_expertise"
+                                    value={formData.plm_admin_expertise}
+                                    onChange={handleChange}
+                                    style={{ width: '99%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
+                                    disabled={submitting || stepChanging}
+                                >
+                                    <option value="">Select...</option>
+                                    {plmAdminExpertiseOptionsData.map((optValue, index) => (
+                                        <option key={index} value={optValue}>
+                                            {optValue}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                    </React.Fragment>
+                ))}
+
 
                 <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'space-between' }}>
                     {step > 1 && (
@@ -362,7 +464,7 @@ useEffect(() => {
                                 color: accenturePurple, border: `2px solid ${accenturePurple}`,
                                 borderRadius: '5px', cursor: 'pointer'
                             }}
-                            disabled={submitting || stepChanging} // Disable during submission or step change
+                            disabled={submitting || stepChanging}
                         >
                             Prev
                         </button>
@@ -377,7 +479,7 @@ useEffect(() => {
                                 color: '#fff', border: 'none', borderRadius: '5px',
                                 cursor: 'pointer', marginLeft: step === 1 ? 'auto' : ''
                             }}
-                            disabled={submitting || stepChanging} // Disable during submission or step change
+                            disabled={submitting || stepChanging}
                         >
                             Next
                         </button>
@@ -389,7 +491,7 @@ useEffect(() => {
                                 color: '#fff', border: 'none', borderRadius: '5px',
                                 cursor: 'pointer', marginLeft: step === 1 ? 'auto' : ''
                             }}
-                            disabled={submitting || stepChanging} // Disable during submission or step change
+                            disabled={submitting || stepChanging}
                         >
                             {submitting ? 'Submitting...' : 'Submit'}
                         </button>
