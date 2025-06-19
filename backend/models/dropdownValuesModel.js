@@ -82,7 +82,15 @@ const plmAdminExpertiseSchema = new mongoose.Schema({
 });
 
 
+// PLM Upgrade Expertise Schema
+const plmUpgradeExpertiseSchema = new mongoose.Schema({
+  value: { type: String, required: true, unique: true, trim: true }
+});
 
+// PLM Testing Expertise Schema
+const plmTestingExpertiseSchema = new mongoose.Schema({
+  value: { type: String, required: true, unique: true, trim: true }
+});
 
 
 
@@ -92,25 +100,18 @@ const plmAdminExpertiseSchema = new mongoose.Schema({
 
 //cloud-knowledge Schema
 const cloudKnowledgeSchema = new mongoose.Schema({
-  id: { type: Number, required: true, unique: true },
-  value: { type: String, required: true, unique: true, lowercase: true, trim: true }
+  value: { type: String, required: true, unique: true, trim: true }
 });
 
-
 //Project Schema
-
 const projectSchema = new mongoose.Schema({
-  id: { type: Number, required: true, unique: true },
-  value: { type: String, required: true, unique: true ,lowercase: true},
-
+  value: { type: String, required: true, unique: true, trim: true }
 });
 
 // DevOps Skills Schema
 const devopsSkillsSchema = new mongoose.Schema({
-  id: { type: Number, required: true, unique: true },
-  value: { type: String, required: true, unique: true, lowercase: true, trim: true }
+  value: { type: String, required: true, unique: true, trim: true }
 });
-
 // Industry Knowledge Schema
 // const industryKnowledgeSchema = new mongoose.Schema({
 //   id: { type: Number, required: true, unique: true },
@@ -128,5 +129,7 @@ const devopsSkillsSchema = new mongoose.Schema({
     DevopsSkill:mongoose.model("DevopsSkill", devopsSkillsSchema),
     PLMDevelopmentExpertise:mongoose.model("PLMDevelopmentExpertise",plmDevelopmentExpertiseSchema),
     PLMAdminExpertise:mongoose.model("PLMAdminExpertise", plmAdminExpertiseSchema),
+    PLMUpgradeExpertise: mongoose.model("PLMUpgradeExpertise", plmUpgradeExpertiseSchema),
+  PLMTestingExpertise: mongoose.model("PLMTestingExpertise", plmTestingExpertiseSchema),
     // IndustryKnowledge: mongoose.model("IndustryKnowledge", industryKnowledgeSchema),
   };

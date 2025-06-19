@@ -1,9 +1,9 @@
 const { Project } = require("../../models/dropdownValuesModel");
 
-// get all projects
+// GET all projects
 const getAllProjects = async (req, res) => {
   try {
-    const projects = await Project.find().sort({ id: 1 });
+    const projects = await Project.find().sort({ value: 1 });
     res.status(200).json(projects);
   } catch (err) {
     console.error("Error fetching projects:", err);
@@ -11,63 +11,52 @@ const getAllProjects = async (req, res) => {
   }
 };
 
-// add project
+// ADD single project
 const addProject = async (req, res) => {
   try {
     const { value } = req.body;
-
     if (!value || typeof value !== "string" || value.trim() === "") {
       return res.status(400).json({ message: "Project name is required." });
     }
 
-    const cleanedValue = value.trim().toLowerCase();
+    const cleanedValue = value.trim();
+    const exists = await Project.findOne({ value: new RegExp(`^${cleanedValue}$`, "i") });
 
-    // Check for existing project (case-insensitive because of lowercase storage)
-    const exists = await Project.findOne({ value: cleanedValue });
-
-    let wasCreated = false;
-
-    if (!exists) {
-      const last = await Project.findOne().sort({ id: -1 });
-      const nextId = last ? last.id + 1 : 1;
-
-      await Project.create({ id: nextId, value: cleanedValue });
-      wasCreated = true;
+    if (exists) {
+      return res.status(400).json({ message: `Project "${cleanedValue}" already exists.` });
     }
 
-    res.status(200).json({
-      success: true,
-      message: wasCreated
-        ? `Project "${cleanedValue}" added to the system.`
-        : `Project "${cleanedValue}" already exists.`,
-      wasCreated
-    });
+    const newProject = await Project.create({ value: cleanedValue });
 
+    res.status(201).json({
+      success: true,
+      message: `Project "${cleanedValue}" added successfully.`,
+      data: newProject
+    });
   } catch (err) {
     console.error("Error adding project:", err);
     res.status(500).json({ message: "Internal server error", error: err.message });
   }
 };
 
-// delete by id
+// DELETE by MongoDB _id
 const deleteProjectById = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-
-    const deleted = await Project.findOneAndDelete({ id });
+    const _id = req.params.id;
+    const deleted = await Project.findByIdAndDelete(_id);
 
     if (!deleted) {
       return res.status(404).json({ error: "Project not found." });
     }
 
-    res.status(200).json({ message: `Project with ID ${id} deleted.`, deleted });
+    res.status(200).json({ message: `Project "${deleted.value}" deleted.`, deleted });
   } catch (err) {
-    console.error("Error deleting project by ID:", err);
+    console.error("Error deleting project:", err);
     res.status(500).json({ error: err.message });
   }
 };
 
-// delete all
+// DELETE all
 const deleteAllProjects = async (req, res) => {
   try {
     const count = await Project.countDocuments();
@@ -93,7 +82,7 @@ const deleteAllProjects = async (req, res) => {
   }
 };
 
-//bult-insert
+// BULK INSERT
 const insertAllProjects = async (req, res) => {
   try {
     const { values } = req.body;
@@ -105,14 +94,14 @@ const insertAllProjects = async (req, res) => {
       });
     }
 
-    const cleanedValues = [...new Set(values.map(v => v.trim().toLowerCase()).filter(Boolean))];
+    const cleanedValues = [...new Set(values.map(v => v.trim()).filter(Boolean))];
 
-    const existingProjects = await Project.find({
-      value: { $in: cleanedValues }
+    const existingDocs = await Project.find({
+      value: { $in: cleanedValues.map(v => new RegExp(`^${v}$`, 'i')) }
     });
 
-    const existingValues = existingProjects.map(p => p.value);
-    const newValues = cleanedValues.filter(v => !existingValues.includes(v));
+    const existingValues = existingDocs.map(doc => doc.value.toLowerCase());
+    const newValues = cleanedValues.filter(v => !existingValues.includes(v.toLowerCase()));
 
     if (newValues.length === 0) {
       return res.status(200).json({
@@ -122,14 +111,7 @@ const insertAllProjects = async (req, res) => {
       });
     }
 
-    const last = await Project.findOne().sort({ id: -1 });
-    let nextId = last ? last.id + 1 : 1;
-
-    const docs = newValues.map(val => ({
-      id: nextId++,
-      value: val
-    }));
-
+    const docs = newValues.map(val => ({ value: val }));
     const inserted = await Project.insertMany(docs);
 
     res.status(201).json({
