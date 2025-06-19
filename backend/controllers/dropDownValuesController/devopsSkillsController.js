@@ -1,16 +1,16 @@
 const { DevopsSkill } = require("../../models/dropdownValuesModel");
 
-// GET all devops skills
+// GET all DevOps skills
 const getAllDevopsSkills = async (req, res) => {
   try {
-    const skills = await DevopsSkill.find().sort({ id: 1 });
+    const skills = await DevopsSkill.find().sort({ value: 1 });
     res.status(200).json(skills);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch DevOps skills", error: err.message });
   }
 };
 
-// ADD a devops skill
+// ADD a DevOps skill
 const addDevopsSkill = async (req, res) => {
   try {
     const { value } = req.body;
@@ -18,17 +18,17 @@ const addDevopsSkill = async (req, res) => {
       return res.status(400).json({ message: "DevOps skill is required." });
     }
 
-    const cleanedValue = value.trim().toLowerCase();
-    const exists = await DevopsSkill.findOne({ value: cleanedValue });
+    const cleanedValue = value.trim();
+
+    const exists = await DevopsSkill.findOne({
+      value: new RegExp(`^${cleanedValue}$`, "i")
+    });
 
     if (exists) {
       return res.status(400).json({ message: `Skill "${cleanedValue}" already exists.` });
     }
 
-    const last = await DevopsSkill.findOne().sort({ id: -1 });
-    const nextId = last ? last.id + 1 : 1;
-
-    const newSkill = await DevopsSkill.create({ id: nextId, value: cleanedValue });
+    const newSkill = await DevopsSkill.create({ value: cleanedValue });
 
     res.status(201).json({
       success: true,
@@ -40,23 +40,23 @@ const addDevopsSkill = async (req, res) => {
   }
 };
 
-// DELETE by ID
+// DELETE by _id
 const deleteDevopsSkillById = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-    const deleted = await DevopsSkill.findOneAndDelete({ id });
+    const _id = req.params.id;
+    const deleted = await DevopsSkill.findByIdAndDelete(_id);
 
     if (!deleted) {
       return res.status(404).json({ error: "Skill not found." });
     }
 
-    res.status(200).json({ message: `Skill with ID ${id} deleted.`, deleted });
+    res.status(200).json({ message: `Skill "${deleted.value}" deleted.`, deleted });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
-// DELETE all
+// DELETE all DevOps skills
 const deleteAllDevopsSkills = async (req, res) => {
   try {
     const count = await DevopsSkill.countDocuments();
@@ -85,6 +85,7 @@ const deleteAllDevopsSkills = async (req, res) => {
 const bulkInsertDevopsSkills = async (req, res) => {
   try {
     const { values } = req.body;
+
     if (!Array.isArray(values) || values.length === 0) {
       return res.status(400).json({
         message: "Values must be a non-empty array.",
@@ -93,12 +94,15 @@ const bulkInsertDevopsSkills = async (req, res) => {
     }
 
     const cleanedValues = [...new Set(
-      values.map(v => v.trim().toLowerCase()).filter(Boolean)
+      values.map(v => v.trim()).filter(Boolean)
     )];
 
-    const existingDocs = await DevopsSkill.find({ value: { $in: cleanedValues } });
-    const existingValues = existingDocs.map(doc => doc.value);
-    const newValues = cleanedValues.filter(v => !existingValues.includes(v));
+    const existingDocs = await DevopsSkill.find({
+      value: { $in: cleanedValues.map(v => new RegExp(`^${v}$`, "i")) }
+    });
+
+    const existingValues = existingDocs.map(doc => doc.value.toLowerCase());
+    const newValues = cleanedValues.filter(v => !existingValues.includes(v.toLowerCase()));
 
     if (newValues.length === 0) {
       return res.status(200).json({
@@ -108,11 +112,7 @@ const bulkInsertDevopsSkills = async (req, res) => {
       });
     }
 
-    const last = await DevopsSkill.findOne().sort({ id: -1 });
-    let nextId = last ? last.id + 1 : 1;
-
-    const docs = newValues.map(val => ({ id: nextId++, value: val }));
-
+    const docs = newValues.map(val => ({ value: val }));
     const inserted = await DevopsSkill.insertMany(docs);
 
     res.status(201).json({

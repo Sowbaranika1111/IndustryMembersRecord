@@ -80,6 +80,13 @@ app.use("/api/plm-dev-expertise",plmDevExpertise);
 const plmAdminExpertise = require("./routes/plmAdminExpertiseRoutes.js")
 app.use("/api/plm-admin-expertise", plmAdminExpertise);
 
+// Add PLM Upgrade Expertise routes
+const plmUpgradeExpertiseRoutes = require("./routes/plmUpgradeExpertiseRoutes");
+app.use("/api/plm-upgrade-expertise", plmUpgradeExpertiseRoutes);
+// PLM Testing Expertise  Routes
+const plmTestingExpertiseRoutes = require('./routes/plmTestingExpertiseRoutes');
+app.use('/api/plm-testing-expertise', plmTestingExpertiseRoutes);
+
 //project
 const projectRoutes = require('./routes/projectRoutes');
 app.use('/api/project', projectRoutes);
