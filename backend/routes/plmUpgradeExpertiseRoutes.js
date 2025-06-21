@@ -1,17 +1,31 @@
 const express = require("express");
 const router = express.Router();
+
 const {
-  getAllUpgradeExpertise,
-  addUpgradeExpertise,
-  deleteUpgradeExpertiseById,
-  deleteAllUpgradeExpertise,
-  bulkInsertUpgradeExpertise
+  getAllPLMUpgradeExpertise,
+  addPLMUpgradeExpertise,
+  updatePLMUpgradeExpertiseById,
+  deletePLMUpgradeExpertiseById,
+  deleteAllPLMUpgradeExpertise,
+  bulkInsertPLMUpgradeExpertise
 } = require("../controllers/dropDownValuesController/plmUpgradeExpertiseController");
 
-router.get("/", getAllUpgradeExpertise);
-router.post("/add", addUpgradeExpertise);
-router.delete("/delete/:id", deleteUpgradeExpertiseById);
-router.delete("/deleteall", deleteAllUpgradeExpertise);
-router.post("/bulk-insert", bulkInsertUpgradeExpertise);
+// GET all PLM upgrade expertise entries
+router.get("/", getAllPLMUpgradeExpertise);
+
+// POST one PLM upgrade expertise
+router.post("/add", addPLMUpgradeExpertise);
+
+// PUT update existing PLM upgrade expertise
+router.put("/update/:id", updatePLMUpgradeExpertiseById);
+
+// DELETE one PLM upgrade expertise by ID
+router.delete("/delete/:id", deletePLMUpgradeExpertiseById);
+
+// DELETE all PLM upgrade expertise entries
+router.delete("/deleteall", deleteAllPLMUpgradeExpertise);
+
+// POST multiple PLM upgrade expertise values
+router.post("/insert-many", bulkInsertPLMUpgradeExpertise);
 
 module.exports = router;
