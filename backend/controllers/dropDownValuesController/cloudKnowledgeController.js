@@ -1,130 +1,237 @@
 const { CloudKnowledge } = require("../../models/dropdownValuesModel");
 
-// GET all
+// GET all cloud knowledge values
 const getAllCloudKnowledge = async (req, res) => {
   try {
     const values = await CloudKnowledge.find().sort({ value: 1 });
-    res.status(200).json(values);
-  } catch (err) {
-    res.status(500).json({
-      message: "Failed to fetch cloud knowledge list",
-      error: err.message
+
+    res.status(200).json({
+      success: true,
+      count: values.length,
+      data: values
     });
+  } catch (err) {
+    console.error("Error in getAllCloudKnowledge:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
-// ADD single
+// POST one value - FIXED CASE SENSITIVITY ISSUE
 const addCloudKnowledge = async (req, res) => {
   try {
     const { value } = req.body;
     if (!value || typeof value !== "string" || value.trim() === "") {
-      return res.status(400).json({ message: "Cloud name is required." });
+      return res.status(400).json({ error: "Cloud value is required." });
     }
 
-    const cleanedValue = value.trim();
-    const exists = await CloudKnowledge.findOne({ value: new RegExp(`^${cleanedValue}$`, 'i') });
+    const trimmed = value.trim();
+    const lowerCaseValue = trimmed.toLowerCase();
+
+    // Check if any case variation exists
+    const exists = await CloudKnowledge.findOne({
+      value: { $regex: new RegExp(`^${trimmed}$`, "i") }
+    });
 
     if (exists) {
-      return res.status(400).json({ message: `Cloud knowledge "${cleanedValue}" already exists.` });
+      return res.status(400).json({ 
+        success: false,
+        message: `Cloud knowledge "${exists.value}" already exists (case-insensitive match).`
+      });
     }
 
-    const newCloud = await CloudKnowledge.create({ value: cleanedValue });
+    const newItem = new CloudKnowledge({ value: trimmed });
+    const saved = await newItem.save();
 
     res.status(201).json({
       success: true,
-      message: `Cloud knowledge "${cleanedValue}" added successfully.`,
-      data: newCloud
+      message: "Cloud knowledge added.",
+      data: saved
     });
   } catch (err) {
-    res.status(500).json({ message: "Internal server error", error: err.message });
+    console.error("Error in addCloudKnowledge:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
-// DELETE by MongoDB _id
+// DELETE by ID
 const deleteCloudKnowledgeById = async (req, res) => {
   try {
-    const _id = req.params.id;
-    const deleted = await CloudKnowledge.findByIdAndDelete(_id);
+    const id = req.params.id;
+    const deleted = await CloudKnowledge.findByIdAndDelete(id);
 
     if (!deleted) {
-      return res.status(404).json({ error: "Cloud knowledge not found." });
+      return res.status(404).json({ success: false, message: "Entry not found." });
     }
 
     res.status(200).json({
-      message: `Cloud knowledge "${deleted.value}" deleted.`,
+      success: true,
+      message: "Cloud knowledge deleted.",
       deleted
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error("Error in deleteCloudKnowledgeById:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
 // DELETE all
 const deleteAllCloudKnowledge = async (req, res) => {
   try {
-    const count = await CloudKnowledge.countDocuments();
-    if (count === 0) {
-      return res.status(200).json({
-        message: "No cloud knowledge records found to delete.",
-        success: true,
-        deletedCount: 0
-      });
-    }
-
-    const result = await CloudKnowledge.deleteMany();
+    const result = await CloudKnowledge.deleteMany({});
     res.status(200).json({
-      message: "All cloud knowledge records removed successfully.",
       success: true,
+      message: `Deleted ${result.deletedCount} cloud knowledge entries.`,
       deletedCount: result.deletedCount
     });
   } catch (err) {
-    res.status(500).json({ error: err.message, success: false });
+    console.error("Error in deleteAllCloudKnowledge:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
-// BULK INSERT
+// BULK INSERT - FIXED CASE SENSITIVITY ISSUE
 const bulkInsertCloudKnowledge = async (req, res) => {
   try {
-    const { values } = req.body;
+    const values = req.body;
 
+    // 1. Validate input
     if (!Array.isArray(values) || values.length === 0) {
-      return res.status(400).json({ message: "Values must be a non-empty array." });
-    }
-
-    const cleanedValues = [...new Set(values.map(v => v.trim()).filter(Boolean))];
-
-    const existingDocs = await CloudKnowledge.find({
-      value: { $in: cleanedValues }
-    });
-
-    const existingValues = existingDocs.map(doc => doc.value.toLowerCase());
-    const newValues = cleanedValues.filter(v => !existingValues.includes(v.toLowerCase()));
-
-    if (newValues.length === 0) {
-      return res.status(200).json({
-        message: "All values already exist.",
-        inserted: 0,
-        alreadyExists: existingValues.length
+      return res.status(400).json({
+        success: false,
+        error: "Request body must be a non-empty array of values.",
       });
     }
 
-    const docs = newValues.map(val => ({ value: val }));
-    const inserted = await CloudKnowledge.insertMany(docs);
+    // 2. Clean and deduplicate input (case-insensitive)
+    const cleanedValues = values
+      .filter(v => typeof v === "string" && v.trim() !== "")
+      .map(v => v.trim());
+      
+    const uniqueInputValues = [];
+    const seen = new Set();
+    
+    for (const val of cleanedValues) {
+      const lowerVal = val.toLowerCase();
+      if (!seen.has(lowerVal)) {
+        seen.add(lowerVal);
+        uniqueInputValues.push(val);
+      }
+    }
+
+    if (uniqueInputValues.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "No valid values provided after filtering.",
+      });
+    }
+
+    // 3. Fetch existing documents (case-insensitive)
+    const existingDocs = await CloudKnowledge.find({
+      value: { $in: uniqueInputValues.map(v => new RegExp(`^${v}$`, 'i')) }
+    });
+
+    const existingSetLower = new Set(
+      existingDocs.map(doc => doc.value.toLowerCase())
+    );
+
+    // 4. Filter new values (case-insensitive)
+    const newValues = uniqueInputValues.filter(
+      val => !existingSetLower.has(val.toLowerCase())
+    );
+
+    const alreadyExistCount = uniqueInputValues.length - newValues.length;
+
+    // 5. Early return if nothing new
+    if (newValues.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "All provided values already exist (case-insensitive).",
+        inserted: 0,
+        alreadyExists: alreadyExistCount,
+        skipped: [...existingSetLower],
+      });
+    }
+
+    // 6. Insert new values
+    const documents = newValues.map(value => ({ value }));
+    const inserted = await CloudKnowledge.insertMany(documents);
 
     res.status(201).json({
-      message: `Inserted ${inserted.length} new cloud knowledge values.`,
-      insertedValues: inserted.map(i => i.value),
-      inserted: inserted.length,
-      alreadyExists: existingValues.length
+      success: true,
+      message: `${inserted.length} new cloud knowledge values added.`,
+      insertedValues: inserted.map(doc => doc.value),
+      alreadyExists: alreadyExistCount,
+      skipped: [...existingSetLower],
     });
-  } catch (err) {
-    res.status(500).json({ error: "Bulk insert failed", success: false });
+
+  } catch (error) {
+    console.error("Error in bulkInsertCloudKnowledge:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error while inserting.",
+    });
   }
 };
 
+// UPDATE existing value (with case-insensitive duplicate check)
+const updateCloudKnowledgeById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { value } = req.body;
+
+    // Validate input
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Cloud value is required." });
+    }
+
+    const trimmed = value.trim();
+
+    // Check if the new value (case-insensitive) exists for another document
+    const existing = await CloudKnowledge.findOne({
+      _id: { $ne: id }, // Exclude current document
+      value: { $regex: new RegExp(`^${trimmed}$`, "i") }
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: `Cloud knowledge "${existing.value}" already exists (case-insensitive match).`
+      });
+    }
+
+    // Update the document
+    const updated = await CloudKnowledge.findByIdAndUpdate(
+      id,
+      { value: trimmed },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Entry not found." 
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Cloud knowledge updated.",
+      data: updated
+    });
+  } catch (err) {
+    console.error("Error in updateCloudKnowledgeById:", err);
+    res.status(500).json({ 
+      success: false, 
+      error: "Internal Server Error" 
+    });
+  }
+};
+
+// Add this to your exports
 module.exports = {
   getAllCloudKnowledge,
   addCloudKnowledge,
+  updateCloudKnowledgeById,  // <-- Add this new function
   deleteCloudKnowledgeById,
   deleteAllCloudKnowledge,
   bulkInsertCloudKnowledge

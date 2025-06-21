@@ -3,134 +3,217 @@ const { Project } = require("../../models/dropdownValuesModel");
 // GET all projects
 const getAllProjects = async (req, res) => {
   try {
-    const projects = await Project.find().sort({ value: 1 });
-    res.status(200).json(projects);
+    const values = await Project.find().sort({ value: 1 });
+    res.status(200).json({
+      success: true,
+      count: values.length,
+      data: values
+    });
   } catch (err) {
-    console.error("Error fetching projects:", err);
-    res.status(500).json({ message: "Failed to fetch project list", error: err.message });
+    console.error("Error in getAllProjects:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
-// ADD single project
+// POST one project (with case-insensitive check)
 const addProject = async (req, res) => {
   try {
     const { value } = req.body;
     if (!value || typeof value !== "string" || value.trim() === "") {
-      return res.status(400).json({ message: "Project name is required." });
+      return res.status(400).json({ error: "Project value is required." });
     }
 
-    const cleanedValue = value.trim();
-    const exists = await Project.findOne({ value: new RegExp(`^${cleanedValue}$`, "i") });
+    const trimmed = value.trim();
+    const exists = await Project.findOne({
+      value: { $regex: new RegExp(`^${trimmed}$`, "i") }
+    });
 
     if (exists) {
-      return res.status(400).json({ message: `Project "${cleanedValue}" already exists.` });
+      return res.status(400).json({ 
+        success: false,
+        message: `Project "${exists.value}" already exists (case-insensitive match).`
+      });
     }
 
-    const newProject = await Project.create({ value: cleanedValue });
-
+    const newItem = new Project({ value: trimmed });
+    const saved = await newItem.save();
     res.status(201).json({
       success: true,
-      message: `Project "${cleanedValue}" added successfully.`,
-      data: newProject
+      message: "Project added.",
+      data: saved
     });
   } catch (err) {
-    console.error("Error adding project:", err);
-    res.status(500).json({ message: "Internal server error", error: err.message });
+    console.error("Error in addProject:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
-// DELETE by MongoDB _id
-const deleteProjectById = async (req, res) => {
+// UPDATE existing project (with case-insensitive check)
+const updateProjectById = async (req, res) => {
   try {
-    const _id = req.params.id;
-    const deleted = await Project.findByIdAndDelete(_id);
+    const { id } = req.params;
+    const { value } = req.body;
 
-    if (!deleted) {
-      return res.status(404).json({ error: "Project not found." });
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Project value is required." });
     }
 
-    res.status(200).json({ message: `Project "${deleted.value}" deleted.`, deleted });
+    const trimmed = value.trim();
+    const existing = await Project.findOne({
+      _id: { $ne: id },
+      value: { $regex: new RegExp(`^${trimmed}$`, "i") }
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: `Project "${existing.value}" already exists (case-insensitive match).`
+      });
+    }
+
+    const updated = await Project.findByIdAndUpdate(
+      id,
+      { value: trimmed },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Entry not found." 
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Project updated.",
+      data: updated
+    });
   } catch (err) {
-    console.error("Error deleting project:", err);
-    res.status(500).json({ error: err.message });
+    console.error("Error in updateProjectById:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// DELETE by ID
+const deleteProjectById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const deleted = await Project.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Entry not found." });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Project deleted.",
+      deleted
+    });
+  } catch (err) {
+    console.error("Error in deleteProjectById:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
 // DELETE all
 const deleteAllProjects = async (req, res) => {
   try {
-    const count = await Project.countDocuments();
-
-    if (count === 0) {
-      return res.status(200).json({
-        message: "No project records found to delete.",
-        success: true,
-        deletedCount: 0
-      });
-    }
-
-    const result = await Project.deleteMany();
-
+    const result = await Project.deleteMany({});
     res.status(200).json({
-      message: "All project records removed successfully.",
       success: true,
+      message: `Deleted ${result.deletedCount} projects.`,
       deletedCount: result.deletedCount
     });
   } catch (err) {
-    console.error("Error deleting all projects:", err);
-    res.status(500).json({ error: err.message, success: false });
+    console.error("Error in deleteAllProjects:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
-// BULK INSERT
-const insertAllProjects = async (req, res) => {
+// BULK INSERT (with case-insensitive checks)
+const bulkInsertProjects = async (req, res) => {
   try {
-    const { values } = req.body;
+    const values = req.body;
 
     if (!Array.isArray(values) || values.length === 0) {
       return res.status(400).json({
-        error: "Values must be a non-empty array.",
-        success: false
+        success: false,
+        error: "Request body must be a non-empty array of values.",
       });
     }
 
-    const cleanedValues = [...new Set(values.map(v => v.trim()).filter(Boolean))];
+    const cleanedValues = values
+      .filter(v => typeof v === "string" && v.trim() !== "")
+      .map(v => v.trim());
+      
+    const uniqueInputValues = [];
+    const seen = new Set();
+    
+    for (const val of cleanedValues) {
+      const lowerVal = val.toLowerCase();
+      if (!seen.has(lowerVal)) {
+        seen.add(lowerVal);
+        uniqueInputValues.push(val);
+      }
+    }
+
+    if (uniqueInputValues.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "No valid values provided after filtering.",
+      });
+    }
 
     const existingDocs = await Project.find({
-      value: { $in: cleanedValues.map(v => new RegExp(`^${v}$`, 'i')) }
+      value: { $in: uniqueInputValues.map(v => new RegExp(`^${v}$`, 'i')) }
     });
 
-    const existingValues = existingDocs.map(doc => doc.value.toLowerCase());
-    const newValues = cleanedValues.filter(v => !existingValues.includes(v.toLowerCase()));
+    const existingSetLower = new Set(
+      existingDocs.map(doc => doc.value.toLowerCase())
+    );
+
+    const newValues = uniqueInputValues.filter(
+      val => !existingSetLower.has(val.toLowerCase())
+    );
+
+    const alreadyExistCount = uniqueInputValues.length - newValues.length;
 
     if (newValues.length === 0) {
       return res.status(200).json({
-        message: "All values already exist.",
+        success: true,
+        message: "All provided values already exist (case-insensitive).",
         inserted: 0,
-        alreadyExists: existingValues.length
+        alreadyExists: alreadyExistCount,
+        skipped: [...existingSetLower],
       });
     }
 
-    const docs = newValues.map(val => ({ value: val }));
-    const inserted = await Project.insertMany(docs);
+    const documents = newValues.map(value => ({ value }));
+    const inserted = await Project.insertMany(documents);
 
     res.status(201).json({
-      message: `Inserted ${inserted.length} new project values.`,
-      insertedValues: inserted.map(i => i.value),
-      inserted: inserted.length,
-      alreadyExists: existingValues.length
+      success: true,
+      message: `${inserted.length} new projects added.`,
+      insertedValues: inserted.map(doc => doc.value),
+      alreadyExists: alreadyExistCount,
+      skipped: [...existingSetLower],
     });
 
-  } catch (err) {
-    console.error("Error in bulk insert:", err);
-    res.status(500).json({ error: "Bulk insert failed", success: false });
+  } catch (error) {
+    console.error("Error in bulkInsertProjects:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error while inserting.",
+    });
   }
 };
 
 module.exports = {
   getAllProjects,
   addProject,
+  updateProjectById,
   deleteProjectById,
   deleteAllProjects,
-  insertAllProjects
+  bulkInsertProjects
 };

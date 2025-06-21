@@ -1,26 +1,31 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 const {
   getAllProjects,
   addProject,
+  updateProjectById,
   deleteProjectById,
   deleteAllProjects,
-  insertAllProjects
-} = require('../controllers/dropDownValuesController/projectController');
+  bulkInsertProjects
+} = require("../controllers/dropDownValuesController/projectController");
 
+// GET all projects
+router.get("/", getAllProjects);
 
-router.get('/', getAllProjects);
+// POST one project
+router.post("/add", addProject);
 
+// PUT update existing project
+router.put("/update/:id", updateProjectById);
 
-router.post('/add', addProject);
+// DELETE one project by ID
+router.delete("/delete/:id", deleteProjectById);
 
+// DELETE all projects
+router.delete("/deleteall", deleteAllProjects);
 
-router.delete('/delete/:id', deleteProjectById);
-
-
-router.delete('/delete-all', deleteAllProjects);
-
-router.post('/insert-many', insertAllProjects);
+// POST multiple projects
+router.post("/insert-many", bulkInsertProjects);
 
 module.exports = router;

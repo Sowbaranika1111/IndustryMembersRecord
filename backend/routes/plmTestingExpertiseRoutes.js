@@ -1,17 +1,31 @@
 const express = require("express");
 const router = express.Router();
+
 const {
-  getAllTestingExpertise,
-  addTestingExpertise,
-  deleteTestingExpertiseById,
-  deleteAllTestingExpertise,
-  bulkInsertTestingExpertise
+  getAllPLMTestingExpertise,
+  addPLMTestingExpertise,
+  updatePLMTestingExpertiseById,
+  deletePLMTestingExpertiseById,
+  deleteAllPLMTestingExpertise,
+  bulkInsertPLMTestingExpertise
 } = require("../controllers/dropDownValuesController/plmTestingExpertiseController");
 
-router.get("/", getAllTestingExpertise);
-router.post("/add", addTestingExpertise);
-router.delete("/delete/:id", deleteTestingExpertiseById);
-router.delete("/deleteall", deleteAllTestingExpertise);
-router.post("/bulk-insert", bulkInsertTestingExpertise);
+// GET all PLM testing expertise entries
+router.get("/", getAllPLMTestingExpertise);
+
+// POST one PLM testing expertise
+router.post("/add", addPLMTestingExpertise);
+
+// PUT update existing PLM testing expertise
+router.put("/update/:id", updatePLMTestingExpertiseById);
+
+// DELETE one PLM testing expertise by ID
+router.delete("/delete/:id", deletePLMTestingExpertiseById);
+
+// DELETE all PLM testing expertise entries
+router.delete("/deleteall", deleteAllPLMTestingExpertise);
+
+// POST multiple PLM testing expertise values
+router.post("/insert-many", bulkInsertPLMTestingExpertise);
 
 module.exports = router;

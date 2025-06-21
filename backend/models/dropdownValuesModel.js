@@ -84,13 +84,17 @@ const plmAdminExpertiseSchema = new mongoose.Schema({
 
 // PLM Upgrade Expertise Schema
 const plmUpgradeExpertiseSchema = new mongoose.Schema({
-  value: { type: String, required: true, unique: true, trim: true }
-});
-
+  value: {
+    type: String,
+    required: true,
+    unique: true, // Ensure that each expertise value is unique
+  },
+}, { timestamps: true }); // Automatically manage createdAt and updatedAt fields
 // PLM Testing Expertise Schema
 const plmTestingExpertiseSchema = new mongoose.Schema({
-  value: { type: String, required: true, unique: true, trim: true }
-});
+  value: { type: String, required: true, unique: true, trim: true },
+
+}, { timestamps: true });
 
 
 
@@ -100,7 +104,12 @@ const plmTestingExpertiseSchema = new mongoose.Schema({
 
 //cloud-knowledge Schema
 const cloudKnowledgeSchema = new mongoose.Schema({
-  value: { type: String, required: true, unique: true, trim: true }
+  value: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true
+  }
 });
 
 //Project Schema

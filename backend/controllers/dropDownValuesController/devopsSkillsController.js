@@ -1,136 +1,219 @@
 const { DevopsSkill } = require("../../models/dropdownValuesModel");
 
-// GET all DevOps skills
-const getAllDevopsSkills = async (req, res) => {
+// GET all devops skills
+const getAllDevOpsSkills = async (req, res) => {
   try {
-    const skills = await DevopsSkill.find().sort({ value: 1 });
-    res.status(200).json(skills);
+    const values = await DevopsSkill.find().sort({ value: 1 });
+    res.status(200).json({
+      success: true,
+      count: values.length,
+      data: values
+    });
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch DevOps skills", error: err.message });
+    console.error("Error in getAllDevOpsSkills:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
-// ADD a DevOps skill
-const addDevopsSkill = async (req, res) => {
+// POST one skill (with case-insensitive check)
+const addDevOpsSkill = async (req, res) => {
   try {
     const { value } = req.body;
     if (!value || typeof value !== "string" || value.trim() === "") {
-      return res.status(400).json({ message: "DevOps skill is required." });
+      return res.status(400).json({ error: "DevOps skill value is required." });
     }
 
-    const cleanedValue = value.trim();
-
+    const trimmed = value.trim();
     const exists = await DevopsSkill.findOne({
-      value: new RegExp(`^${cleanedValue}$`, "i")
+      value: { $regex: new RegExp(`^${trimmed}$`, "i") }
     });
 
     if (exists) {
-      return res.status(400).json({ message: `Skill "${cleanedValue}" already exists.` });
-    }
-
-    const newSkill = await DevopsSkill.create({ value: cleanedValue });
-
-    res.status(201).json({
-      success: true,
-      message: `Skill "${cleanedValue}" added successfully.`,
-      data: newSkill
-    });
-  } catch (err) {
-    res.status(500).json({ message: "Internal server error", error: err.message });
-  }
-};
-
-// DELETE by _id
-const deleteDevopsSkillById = async (req, res) => {
-  try {
-    const _id = req.params.id;
-    const deleted = await DevopsSkill.findByIdAndDelete(_id);
-
-    if (!deleted) {
-      return res.status(404).json({ error: "Skill not found." });
-    }
-
-    res.status(200).json({ message: `Skill "${deleted.value}" deleted.`, deleted });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// DELETE all DevOps skills
-const deleteAllDevopsSkills = async (req, res) => {
-  try {
-    const count = await DevopsSkill.countDocuments();
-
-    if (count === 0) {
-      return res.status(200).json({
-        message: "No DevOps skills found to delete.",
-        success: true,
-        deletedCount: 0
+      return res.status(400).json({ 
+        success: false,
+        message: `DevOps skill "${exists.value}" already exists (case-insensitive match).`
       });
     }
 
-    const result = await DevopsSkill.deleteMany();
+    const newItem = new DevopsSkill({ value: trimmed });
+    const saved = await newItem.save();
+    res.status(201).json({
+      success: true,
+      message: "DevOps skill added.",
+      data: saved
+    });
+  } catch (err) {
+    console.error("Error in addDevOpsSkill:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// UPDATE existing skill (with case-insensitive check)
+const updateDevOpsSkillById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { value } = req.body;
+
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "DevOps skill value is required." });
+    }
+
+    const trimmed = value.trim();
+    const existing = await DevopsSkill.findOne({
+      _id: { $ne: id },
+      value: { $regex: new RegExp(`^${trimmed}$`, "i") }
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: `DevOps skill "${existing.value}" already exists (case-insensitive match).`
+      });
+    }
+
+    const updated = await DevopsSkill.findByIdAndUpdate(
+      id,
+      { value: trimmed },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Entry not found." 
+      });
+    }
 
     res.status(200).json({
-      message: "All DevOps skills deleted.",
       success: true,
+      message: "DevOps skill updated.",
+      data: updated
+    });
+  } catch (err) {
+    console.error("Error in updateDevOpsSkillById:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// DELETE by ID
+const deleteDevOpsSkillById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const deleted = await DevopsSkill.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Entry not found." });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "DevOps skill deleted.",
+      deleted
+    });
+  } catch (err) {
+    console.error("Error in deleteDevOpsSkillById:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// DELETE all
+const deleteAllDevOpsSkills = async (req, res) => {
+  try {
+    const result = await DevopsSkill.deleteMany({});
+    res.status(200).json({
+      success: true,
+      message: `Deleted ${result.deletedCount} DevOps skills.`,
       deletedCount: result.deletedCount
     });
   } catch (err) {
-    res.status(500).json({ error: err.message, success: false });
+    console.error("Error in deleteAllDevOpsSkills:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
-// BULK INSERT
-const bulkInsertDevopsSkills = async (req, res) => {
+// BULK INSERT (with case-insensitive checks)
+const bulkInsertDevOpsSkills = async (req, res) => {
   try {
-    const { values } = req.body;
+    const values = req.body;
 
     if (!Array.isArray(values) || values.length === 0) {
       return res.status(400).json({
-        message: "Values must be a non-empty array.",
-        success: false
+        success: false,
+        error: "Request body must be a non-empty array of values.",
       });
     }
 
-    const cleanedValues = [...new Set(
-      values.map(v => v.trim()).filter(Boolean)
-    )];
+    const cleanedValues = values
+      .filter(v => typeof v === "string" && v.trim() !== "")
+      .map(v => v.trim());
+      
+    const uniqueInputValues = [];
+    const seen = new Set();
+    
+    for (const val of cleanedValues) {
+      const lowerVal = val.toLowerCase();
+      if (!seen.has(lowerVal)) {
+        seen.add(lowerVal);
+        uniqueInputValues.push(val);
+      }
+    }
+
+    if (uniqueInputValues.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: "No valid values provided after filtering.",
+      });
+    }
 
     const existingDocs = await DevopsSkill.find({
-      value: { $in: cleanedValues.map(v => new RegExp(`^${v}$`, "i")) }
+      value: { $in: uniqueInputValues.map(v => new RegExp(`^${v}$`, 'i')) }
     });
 
-    const existingValues = existingDocs.map(doc => doc.value.toLowerCase());
-    const newValues = cleanedValues.filter(v => !existingValues.includes(v.toLowerCase()));
+    const existingSetLower = new Set(
+      existingDocs.map(doc => doc.value.toLowerCase())
+    );
+
+    const newValues = uniqueInputValues.filter(
+      val => !existingSetLower.has(val.toLowerCase())
+    );
+
+    const alreadyExistCount = uniqueInputValues.length - newValues.length;
 
     if (newValues.length === 0) {
       return res.status(200).json({
-        message: "All values already exist.",
+        success: true,
+        message: "All provided values already exist (case-insensitive).",
         inserted: 0,
-        alreadyExists: existingValues.length
+        alreadyExists: alreadyExistCount,
+        skipped: [...existingSetLower],
       });
     }
 
-    const docs = newValues.map(val => ({ value: val }));
-    const inserted = await DevopsSkill.insertMany(docs);
+    const documents = newValues.map(value => ({ value }));
+    const inserted = await DevopsSkill.insertMany(documents);
 
     res.status(201).json({
-      message: `Inserted ${inserted.length} DevOps skills.`,
-      insertedValues: inserted.map(i => i.value),
-      inserted: inserted.length,
-      alreadyExists: existingValues.length
+      success: true,
+      message: `${inserted.length} new DevOps skills added.`,
+      insertedValues: inserted.map(doc => doc.value),
+      alreadyExists: alreadyExistCount,
+      skipped: [...existingSetLower],
     });
 
-  } catch (err) {
-    res.status(500).json({ error: "Bulk insert failed", success: false });
+  } catch (error) {
+    console.error("Error in bulkInsertDevOpsSkills:", error);
+    res.status(500).json({
+      success: false,
+      error: "Internal Server Error while inserting.",
+    });
   }
 };
 
 module.exports = {
-  getAllDevopsSkills,
-  addDevopsSkill,
-  deleteDevopsSkillById,
-  deleteAllDevopsSkills,
-  bulkInsertDevopsSkills
+  getAllDevOpsSkills,
+  addDevOpsSkill,
+  updateDevOpsSkillById,
+  deleteDevOpsSkillById,
+  deleteAllDevOpsSkills,
+  bulkInsertDevOpsSkills
 };
