@@ -128,7 +128,19 @@ const devopsSkillsSchema = new mongoose.Schema({
 //   value: { type: String, required: true },
 // });
 
-  // Export both models
+const plmCadIntegrationSchema = new mongoose.Schema({
+  value: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+  },
+}, {
+  timestamps: true,
+});
+
+
+
   module.exports = {
     CurrentRole: mongoose.model("CurrentRole", currentRoleSchema),
     WorkLocation: mongoose.model("WorkLocation", workLocationSchema),
@@ -139,6 +151,7 @@ const devopsSkillsSchema = new mongoose.Schema({
     PLMDevelopmentExpertise:mongoose.model("PLMDevelopmentExpertise",plmDevelopmentExpertiseSchema),
     PLMAdminExpertise:mongoose.model("PLMAdminExpertise", plmAdminExpertiseSchema),
     PLMUpgradeExpertise: mongoose.model("PLMUpgradeExpertise", plmUpgradeExpertiseSchema),
-  PLMTestingExpertise: mongoose.model("PLMTestingExpertise", plmTestingExpertiseSchema),
+    PLMTestingExpertise: mongoose.model("PLMTestingExpertise", plmTestingExpertiseSchema),
+    PLMCADintegrations: mongoose.model("PLMCADintegrations",plmCadIntegrationSchema)
     // IndustryKnowledge: mongoose.model("IndustryKnowledge", industryKnowledgeSchema),
   };
