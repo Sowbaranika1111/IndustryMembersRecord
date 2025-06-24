@@ -95,7 +95,9 @@ app.use('/api/project', projectRoutes);
 const devopsSkillsRoutes = require("./routes/devopsSkillsRoutes");
 app.use("/api/devops-skills", devopsSkillsRoutes);
 
-
+//plm cad integrations
+const plmCadIntegrations = require("./routes/plmCadIntegrationsRoutes.js");
+app.use("/api/plm-cad-integrations",plmCadIntegrations);
 
 //! Login Admin Routes
 
