@@ -6,23 +6,26 @@ const {
   addCloudKnowledge,
   deleteCloudKnowledgeById,
   deleteAllCloudKnowledge,
-  bulkInsertCloudKnowledge
+  bulkInsertCloudKnowledge,
+  updateCloudKnowledgeById
 } = require("../controllers/dropDownValuesController/cloudKnowledgeController");
 
 // GET all cloud knowledge values
 router.get("/", getAllCloudKnowledge);
 
-// POST add new cloud knowledge
+// POST one cloud knowledge value (with case-insensitive check)
 router.post("/add", addCloudKnowledge);
 
-// DELETE cloud knowledge by ID
+// DELETE one cloud knowledge by ID
 router.delete("/delete/:id", deleteCloudKnowledgeById);
 
-// DELETE all cloud knowledge
-router.delete("/delete-all", deleteAllCloudKnowledge);
+// DELETE all cloud knowledge entries
+router.delete("/deleteall", deleteAllCloudKnowledge);
 
-//bulk-insert
-router.post('/insert-many',bulkInsertCloudKnowledge);
+// POST multiple cloud knowledge values (with case-insensitive checks)
+router.post("/insert-many", bulkInsertCloudKnowledge);
 
+// PUT update existing cloud knowledge value
+router.put("/update/:id", updateCloudKnowledgeById);
 
 module.exports = router;
