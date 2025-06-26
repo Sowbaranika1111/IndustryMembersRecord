@@ -1,14 +1,6 @@
 const mongoose = require("mongoose");
 
-// Current Role Schema
-// const currentRoleSchema = new mongoose.Schema({
-//   id: { type: Number, required: true, unique: true },
-//   value: { type: String, required: true },
-// });
-
 const currentRoleSchema = new mongoose.Schema({
-  // The manual 'id' field is GONE. This is the fix.
-  // We rely on MongoDB's automatic _id.
 
   value: {
     type: String,
@@ -19,9 +11,6 @@ const currentRoleSchema = new mongoose.Schema({
 }, {
   timestamps: true, // Automatically adds createdAt and updatedAt.
 });
-
-
-
 
 
 
@@ -31,11 +20,11 @@ const workLocationSchema = new mongoose.Schema({
   value: {
     type: String,
     required: true,
-    unique: true,   // A database-level rule to prevent duplicate role names.
+    unique: true,   
     trim: true,
   },
 }, {
-  timestamps: true, // Automatically adds createdAt and updatedAt.
+  timestamps: true,
 });
 
 //designation schema
@@ -43,42 +32,38 @@ const workLocationSchema = new mongoose.Schema({
  value: {
     type: String,
     required: true,
-    unique: true,   // A database-level rule to prevent duplicate role names.
+    unique: true,
     trim: true,
   },
 }, {
-  timestamps: true, // Automatically adds createdAt and updatedAt.
+  timestamps: true,
 });
 
 // PLM Development Schema
 const plmDevelopmentExpertiseSchema = new mongoose.Schema({
-  // The manual 'id' field is GONE. This is the fix.
-  // We rely on MongoDB's automatic _id.
 
   value: {
     type: String,
     required: true,
-    unique: true,   // A database-level rule to prevent duplicate role names.
+    unique: true,
     trim: true,
   },
 }, {
-  timestamps: true, // Automatically adds createdAt and updatedAt.
+  timestamps: true,
 });
 
 //PLM Admin Expertise Schema
 
 const plmAdminExpertiseSchema = new mongoose.Schema({
-  // The manual 'id' field is GONE. This is the fix.
-  // We rely on MongoDB's automatic _id.
 
   value: {
     type: String,
     required: true,
-    unique: true,   // A database-level rule to prevent duplicate role names.
+    unique: true, 
     trim: true,
   },
 }, {
-  timestamps: true, // Automatically adds createdAt and updatedAt.
+  timestamps: true, 
 });
 
 
@@ -87,18 +72,15 @@ const plmUpgradeExpertiseSchema = new mongoose.Schema({
   value: {
     type: String,
     required: true,
-    unique: true, // Ensure that each expertise value is unique
+    unique: true,
   },
-}, { timestamps: true }); // Automatically manage createdAt and updatedAt fields
+}, { timestamps: true }); 
+
 // PLM Testing Expertise Schema
 const plmTestingExpertiseSchema = new mongoose.Schema({
   value: { type: String, required: true, unique: true, trim: true },
 
 }, { timestamps: true });
-
-
-
-
 
 
 
@@ -128,7 +110,22 @@ const devopsSkillsSchema = new mongoose.Schema({
 //   value: { type: String, required: true },
 // });
 
+
+//plmCadIntegrationSchema
 const plmCadIntegrationSchema = new mongoose.Schema({
+  value: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+  },
+}, {
+  timestamps: true,
+});
+
+
+// projectDeliveryModelsSchema
+const projectDeliveryModelsSchema = new mongoose.Schema({
   value: {
     type: String,
     required: true,
@@ -152,6 +149,7 @@ const plmCadIntegrationSchema = new mongoose.Schema({
     PLMAdminExpertise:mongoose.model("PLMAdminExpertise", plmAdminExpertiseSchema),
     PLMUpgradeExpertise: mongoose.model("PLMUpgradeExpertise", plmUpgradeExpertiseSchema),
     PLMTestingExpertise: mongoose.model("PLMTestingExpertise", plmTestingExpertiseSchema),
-    PLMCADintegrations: mongoose.model("PLMCADintegrations",plmCadIntegrationSchema)
+    PLMCADintegrations: mongoose.model("PLMCADintegrations",plmCadIntegrationSchema),
+    ProjectDeliveryModels: mongoose.model("ProjectDeliveryModels",projectDeliveryModelsSchema),
     // IndustryKnowledge: mongoose.model("IndustryKnowledge", industryKnowledgeSchema),
   };
