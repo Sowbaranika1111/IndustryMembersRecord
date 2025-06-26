@@ -1,6 +1,5 @@
 const { PLMCADintegrations } = require("../../models/dropdownValuesModel.js");
 
-
 //! Get all PLM CAD integrations
 const getAllPlmCadIntegrations = async (req, res) => {
   try {
@@ -8,7 +7,9 @@ const getAllPlmCadIntegrations = async (req, res) => {
     res.status(200).json(items);
   } catch (error) {
     console.error("Error fetching PLM CAD integrations:", error);
-    res.status(500).json({ message: "Server error while fetching PLM CAD integrations" });
+    res
+      .status(500)
+      .json({ message: "Server error while fetching PLM CAD integrations" });
   }
 };
 
@@ -126,20 +127,23 @@ const deleteAllPlmCadIntegrations = async (req, res) => {
 //! Insert multiple PLM CAD integrations
 const insertAllPlmCadIntegrations = async (req, res) => {
   try {
-    const { value } = req.body;
+    const inputArray = req.body; // directly expect ["value1", "value2", ...]
 
-    if (!Array.isArray(value) || value.length === 0) {
+    if (!Array.isArray(inputArray) || inputArray.length === 0) {
       return res.status(400).json({
         success: false,
-        error: "Request must contain a non-empty 'value' array.",
+        error: "Request body must be a non-empty array of strings.",
       });
     }
 
-    const uniqueValues = [...new Set(value.map((v) => String(v).trim()).filter(Boolean))];
+    const uniqueValues = [
+      ...new Set(inputArray.map((v) => String(v).trim()).filter(Boolean)),
+    ];
+
     if (uniqueValues.length === 0) {
       return res.status(400).json({
         success: false,
-        error: "No valid values provided.",
+        error: "No valid values provided after filtering.",
       });
     }
 
@@ -148,28 +152,28 @@ const insertAllPlmCadIntegrations = async (req, res) => {
     });
 
     const existingValues = new Set(existingDocs.map((doc) => doc.value));
-    const newValues = uniqueValues.filter((val) => !existingValues.has(val));
-    const alreadyExistCount = uniqueValues.length - newValues.length;
 
-    if (newValues.length === 0) {
+    const newValuesToInsert = uniqueValues.filter(
+      (val) => !existingValues.has(val)
+    );
+
+    if (newValuesToInsert.length === 0) {
       return res.status(200).json({
         success: true,
         message: "All provided values already exist.",
-        totalProvided: uniqueValues.length,
         inserted: 0,
-        alreadyExists: alreadyExistCount,
+        alreadyExists: uniqueValues.length,
       });
     }
 
-    const docsToInsert = newValues.map((value) => ({ value }));
-    const inserted = await PLMCADintegrations.insertMany(docsToInsert);
+    const documents = newValuesToInsert.map((value) => ({ value }));
+    const inserted = await PLMCADintegrations.insertMany(documents);
 
     res.status(201).json({
       success: true,
-      message: `Inserted ${inserted.length} new PLM CAD integrations.`,
-      totalProvided: uniqueValues.length,
+      message: `Inserted ${inserted.length} new value(s).`,
       inserted: inserted.length,
-      alreadyExists: alreadyExistCount,
+      alreadyExists: uniqueValues.length - inserted.length,
       insertedValues: inserted.map((doc) => doc.value),
     });
   } catch (err) {
