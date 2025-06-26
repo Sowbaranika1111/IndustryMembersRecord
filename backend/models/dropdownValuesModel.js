@@ -82,6 +82,20 @@ const plmTestingExpertiseSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+// PLM Integration Expertise Schema
+const plmIntegrationExpertiseSchema = new mongoose.Schema({
+value: { type: String, required: true, unique: true, trim: true },
+},{
+timestamps: true, // Automatically adds createdAt and updatedAt.
+});
+
+
+// PLM Support Expertise Schema
+const plmSupportExpertiseSchema = new mongoose.Schema({
+value: { type: String, required: true, unique: true, trim: true },
+},{
+timestamps: true, // Automatically adds createdAt and updatedAt.
+});
 
 
 //cloud-knowledge Schema
@@ -150,6 +164,13 @@ const projectDeliveryModelsSchema = new mongoose.Schema({
     PLMUpgradeExpertise: mongoose.model("PLMUpgradeExpertise", plmUpgradeExpertiseSchema),
     PLMTestingExpertise: mongoose.model("PLMTestingExpertise", plmTestingExpertiseSchema),
     PLMCADintegrations: mongoose.model("PLMCADintegrations",plmCadIntegrationSchema),
+<<<<<<< Updated upstream
     ProjectDeliveryModels: mongoose.model("ProjectDeliveryModels",projectDeliveryModelsSchema),
+=======
+    PLMIntegrationExpertise: mongoose.model("PLMIntegrationExpertise",plmIntegrationExpertiseSchema),
+    PLMSupportExpertise: mongoose.model("PLMSupportExpertise",plmSupportExpertiseSchema)
+
+
+>>>>>>> Stashed changes
     // IndustryKnowledge: mongoose.model("IndustryKnowledge", industryKnowledgeSchema),
   };
