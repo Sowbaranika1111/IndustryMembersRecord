@@ -89,6 +89,7 @@ value: { type: String, required: true, unique: true, trim: true },
 timestamps: true, // Automatically adds createdAt and updatedAt.
 });
 
+<<<<<<< Updated upstream
 
 // PLM Support Expertise Schema
 const plmSupportExpertiseSchema = new mongoose.Schema({
@@ -98,6 +99,8 @@ timestamps: true, // Automatically adds createdAt and updatedAt.
 });
 
 
+=======
+>>>>>>> Stashed changes
 //cloud-knowledge Schema
 const cloudKnowledgeSchema = new mongoose.Schema({
   value: {
@@ -117,6 +120,11 @@ const projectSchema = new mongoose.Schema({
 const devopsSkillsSchema = new mongoose.Schema({
   value: { type: String, required: true, unique: true, trim: true }
 });
+
+const plmSapExpertiseSchema= new mongoose.Schema({
+  value: { type: String, required: true, unique: true, trim: true }
+});
+
 // Industry Knowledge Schema
 // const industryKnowledgeSchema = new mongoose.Schema({
 //   id: { type: Number, required: true, unique: true },
@@ -162,6 +170,7 @@ const projectDeliveryModelsSchema = new mongoose.Schema({
     PLMDevelopmentExpertise:mongoose.model("PLMDevelopmentExpertise",plmDevelopmentExpertiseSchema),
     PLMAdminExpertise:mongoose.model("PLMAdminExpertise", plmAdminExpertiseSchema),
     PLMUpgradeExpertise: mongoose.model("PLMUpgradeExpertise", plmUpgradeExpertiseSchema),
+<<<<<<< Updated upstream
     PLMTestingExpertise: mongoose.model("PLMTestingExpertise", plmTestingExpertiseSchema),
     PLMCADintegrations: mongoose.model("PLMCADintegrations",plmCadIntegrationSchema),
     ProjectDeliveryModels: mongoose.model("ProjectDeliveryModels",projectDeliveryModelsSchema),
@@ -169,5 +178,10 @@ const projectDeliveryModelsSchema = new mongoose.Schema({
     PLMSupportExpertise: mongoose.model("PLMSupportExpertise",plmSupportExpertiseSchema)
 
 
+=======
+    PLMTestingExpertise: mongoose.model("PLMTestingExpesrtise", plmTestingExpertiseSchema),
+    PLMCADintegrations: mongoose.model("PLMCADintegrations",plmCadIntegrationSchema),
+    PLMSapExpertise: mongoose.model("PLMSapExpertise",plmSapExpertiseSchema),
+>>>>>>> Stashed changes
     // IndustryKnowledge: mongoose.model("IndustryKnowledge", industryKnowledgeSchema),
   };

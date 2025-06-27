@@ -80,6 +80,12 @@ app.use("/api/plm-dev-expertise",plmDevExpertise);
 const plmAdminExpertise = require("./routes/plmAdminExpertiseRoutes.js")
 app.use("/api/plm-admin-expertise", plmAdminExpertise);
 
+
+//plm-sap-expertise
+const plmSapExpertise = require("./routes/plmSapExpertiseRoutes.js")
+app.use("/api/plm-sap-expertise", plmSapExpertise);
+
+
 // Add PLM Upgrade Expertise routes
 const plmUpgradeExpertiseRoutes = require("./routes/plmUpgradeExpertiseRoutes");
 app.use("/api/plm-upgrade-expertise", plmUpgradeExpertiseRoutes);
