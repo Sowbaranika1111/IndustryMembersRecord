@@ -33,14 +33,6 @@ exports.addBatchmate = async (req, res) => {
     const batchmate = new Batchmate(newBatchmateData);
     const savedBatchmate = await batchmate.save();
 
-    if (typeof appendToExcel === "function") {
-      appendToExcel(savedBatchmate.toObject());
-    } else {
-      console.warn(
-        "appendToExcel utility is not available or not imported correctly."
-      );
-    }
-
     res.status(201).json(savedBatchmate.toObject());
   } catch (err) {
     if (err.code === 11000) {
