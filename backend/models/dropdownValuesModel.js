@@ -164,13 +164,10 @@ const projectDeliveryModelsSchema = new mongoose.Schema({
     PLMUpgradeExpertise: mongoose.model("PLMUpgradeExpertise", plmUpgradeExpertiseSchema),
     PLMTestingExpertise: mongoose.model("PLMTestingExpertise", plmTestingExpertiseSchema),
     PLMCADintegrations: mongoose.model("PLMCADintegrations",plmCadIntegrationSchema),
-<<<<<<< Updated upstream
     ProjectDeliveryModels: mongoose.model("ProjectDeliveryModels",projectDeliveryModelsSchema),
-=======
     PLMIntegrationExpertise: mongoose.model("PLMIntegrationExpertise",plmIntegrationExpertiseSchema),
     PLMSupportExpertise: mongoose.model("PLMSupportExpertise",plmSupportExpertiseSchema)
 
 
->>>>>>> Stashed changes
     // IndustryKnowledge: mongoose.model("IndustryKnowledge", industryKnowledgeSchema),
   };

@@ -99,11 +99,9 @@ app.use("/api/devops-skills", devopsSkillsRoutes);
 const plmCadIntegrations = require("./routes/plmCadIntegrationsRoutes.js");
 app.use("/api/plm-cad-integrations",plmCadIntegrations);
 
-<<<<<<< Updated upstream
 //project delivery models
 const projectDeliveryModels = require("./routes/projectDeliveryModelsRoutes.js");
 app.use("/api/project-delivery-models",projectDeliveryModels);
-=======
 //plm Integration Expertise
 const plmIntegrationExpertise = require("./routes/plmIntegrationRoutes.js");
 app.use("/api/plm-integration",plmIntegrationExpertise);
@@ -111,7 +109,6 @@ app.use("/api/plm-integration",plmIntegrationExpertise);
 //plm Support Expertise
 const plmSupportExpertise = require("./routes/plmSupportRoutes.js");
 app.use("/api/plm-support",plmSupportExpertise);
->>>>>>> Stashed changes
 
 //! Login Admin Routes
 
