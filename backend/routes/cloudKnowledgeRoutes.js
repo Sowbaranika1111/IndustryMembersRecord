@@ -20,7 +20,7 @@ router.post("/add", addCloudKnowledge);
 router.delete("/delete/:id", deleteCloudKnowledgeById);
 
 // DELETE all cloud knowledge entries
-router.delete("/deleteall", deleteAllCloudKnowledge);
+router.delete("/delete-all", deleteAllCloudKnowledge);
 
 // POST multiple cloud knowledge values (with case-insensitive checks)
 router.post("/insert-many", bulkInsertCloudKnowledge);

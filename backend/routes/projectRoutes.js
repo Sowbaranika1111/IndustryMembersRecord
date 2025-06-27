@@ -23,7 +23,7 @@ router.put("/update/:id", updateProjectById);
 router.delete("/delete/:id", deleteProjectById);
 
 // DELETE all projects
-router.delete("/deleteall", deleteAllProjects);
+router.delete("/delete-all", deleteAllProjects);
 
 // POST multiple projects
 router.post("/insert-many", bulkInsertProjects);

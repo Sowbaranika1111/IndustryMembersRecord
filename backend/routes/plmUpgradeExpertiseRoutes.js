@@ -23,7 +23,7 @@ router.put("/update/:id", updatePLMUpgradeExpertiseById);
 router.delete("/delete/:id", deletePLMUpgradeExpertiseById);
 
 // DELETE all PLM upgrade expertise entries
-router.delete("/deleteall", deleteAllPLMUpgradeExpertise);
+router.delete("/delete-all", deleteAllPLMUpgradeExpertise);
 
 // POST multiple PLM upgrade expertise values
 router.post("/insert-many", bulkInsertPLMUpgradeExpertise);
