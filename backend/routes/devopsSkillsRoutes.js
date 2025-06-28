@@ -23,7 +23,7 @@ router.put("/update/:id", updateDevOpsSkillById);
 router.delete("/delete/:id", deleteDevOpsSkillById);
 
 // DELETE all devops skills
-router.delete("/deleteall", deleteAllDevOpsSkills);
+router.delete("/delete-all", deleteAllDevOpsSkills);
 
 // POST multiple devops skills
 router.post("/insert-many", bulkInsertDevOpsSkills);
