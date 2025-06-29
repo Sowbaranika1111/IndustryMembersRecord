@@ -236,7 +236,7 @@ const Login = () => {
                                     className="form-input"
                                     value={enterpriseId}
                                     onChange={(e) => setEnterpriseId(e.target.value)}
-                                    placeholder="e.g., john.doe"
+                                    placeholder="e.g., enterprise.id"
                                     autoFocus
                                     disabled={loading}
                                 />

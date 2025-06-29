@@ -1,5 +1,5 @@
 const Batchmate = require("../models/Batchmate.js");
-const { appendToExcel } = require("../utils/excelHandler.js");
+//const { appendToExcel } = require("../utils/excelHandler.js");
 
 exports.addBatchmate = async (req, res) => {
   try {
