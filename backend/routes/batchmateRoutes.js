@@ -9,6 +9,7 @@ const {
   updateBatchmate,
   getBatchmateById,
   getBatchmateByEmail,
+  getBatchmateByEnterpriseId,
   deleteAllBatchmates
 } = require('../controllers/batchmateController');
 
@@ -34,6 +35,8 @@ router.get('/id/:id', getBatchmateById);
 // GET by email
 router.get("/email", getBatchmateByEmail);
 
+// GET by enterprise ID
+router.get("/enterprise/:enterpriseId", getBatchmateByEnterpriseId);
 
 // DELETE
 router.delete("/delete-all", deleteAllBatchmates);

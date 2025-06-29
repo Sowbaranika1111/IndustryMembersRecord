@@ -216,34 +216,6 @@ exports.searchBatchmateByName = async (req, res) => {
   }
 };
 
-exports.searchBatchmateByName = async (req, res) => {
-  try {
-    const { name } = req.query;
-
-    if (!name) {
-      return res
-        .status(400)
-        .json({ error: "Name query parameter is required" });
-    }
-
-    // Partial match, case-insensitive
-    const regex = new RegExp(name, "i");
-
-    const results = await Batchmate.find({ name: regex }).lean();
-
-    if (!results || results.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No batchmates found with that name" });
-    }
-
-    res.status(200).json(results);
-  } catch (err) {
-    console.error("Error in searchBatchmateByName:", err);
-    res.status(500).json({ error: "Server error: " + err.message });
-  }
-};
-
 exports.updateBatchmate = async (req, res) => {
   try {
     const { name: searchNameParam } = req.params;
@@ -351,6 +323,72 @@ exports.deleteAllBatchmates = async (req, res) => {
       success: false,
       error: "Internal server error while deleting batchmate data.",
       details: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
+  }
+};
+
+// GET by enterprise ID
+exports.getBatchmateByEnterpriseId = async (req, res) => {
+  try {
+    const { enterpriseId } = req.params;
+    
+    if (!enterpriseId || typeof enterpriseId !== "string" || enterpriseId.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "A valid enterprise ID parameter is required.",
+      });
+    }
+
+    const normalizedEnterpriseId = enterpriseId.trim().toLowerCase();
+
+    const batchmate = await Batchmate.findOne({
+      enterpriseid: normalizedEnterpriseId,
+    })
+      .select("-otp -otp_expiry")
+      .lean();
+
+    if (!batchmate) {
+      return res.status(404).json({
+        success: false,
+        message: "Batchmate not found with the provided enterprise ID.",
+      });
+    }
+
+    console.log(
+      `GET_BATCHMATE_BY_ENTERPRISE_ID: Successfully retrieved data for '${normalizedEnterpriseId}'`
+    );
+
+    res.status(200).json({
+      success: true,
+      data: batchmate,
+      message: "Batchmate details retrieved successfully",
+    });
+  } catch (err) {
+    console.error("Error in getBatchmateByEnterpriseId:", err);
+
+    if (err.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        error: "Validation error",
+        details: err.message,
+      });
+    }
+
+    if (err.name === "CastError") {
+      return res.status(400).json({
+        success: false,
+        error: "Invalid data format",
+        details: err.message,
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: "Internal server error",
+      message:
+        process.env.NODE_ENV === "development"
+          ? err.message
+          : "Something went wrong",
     });
   }
 };

@@ -12,7 +12,7 @@ const fieldLabels = {
     management_level: 'Management Level',
     work_location: 'Work Location',
     project: 'Project',
-    designation: 'Designation',
+    job_profile: 'Designation',
     current_role: 'Current Role',
     overall_experience_years: 'Overall Experience (Years)',
     overall_experience_months: 'Overall Experience (Months)',
@@ -31,6 +31,8 @@ const fieldLabels = {
     plm_admin: 'PLM Admin',
     plm_admin_expertise: 'PLM Admin Expertise',
     plm_upgrade: 'PLM Upgrade',
+    plm_upgrade_expertise: 'PLM Upgrade Expertise',
+    plm_upgrade_experience: 'PLM Upgrade Experience',
     plm_cad_integration: 'PLM CAD Integration',
     plm_interfaceintegration: 'PLM Interface/Integration',
     plm_sap_integration: 'PLM SAP Integration',
@@ -53,6 +55,12 @@ const fieldLabels = {
     project_delivery_model: 'Project Delivery Model',
     project_delivery_years: 'Years of Experience in Project Delivery Model',
     project_delivery_experience: 'Experience in Project Delivery Model',
+    plm_testing_expertise: 'PLM Testing Expertise',
+    plm_testing_experience: 'PLM Testing Experience',
+    plm_support_expertise: 'PLM Support Expertise',
+    plm_support_experience: 'PLM Support Experience',
+    plm_integration_expertise: 'PLM Integration Expertise',
+    plm_integration_experience: 'PLM Integration Experience',
 };
 
 const dropdownOptions = {
@@ -89,7 +97,7 @@ const frontendToBackendKeyMap = {
     management_level: 'management_level',
     work_location: 'work_location',
     project: 'project',
-    designation: 'designation',
+    job_profile: 'job_profile',
     current_role: 'current_role',
     overall_experience_years: 'overall_experience_years',
     overall_experience_months: 'overall_experience_months',
@@ -111,6 +119,8 @@ const frontendToBackendKeyMap = {
     plm_admin_expertise_dropdown: 'plm_admin_expertise_dropdown',
     plm_admin_experience: 'plm_admin_experience',
     plm_upgrade: 'plm_upgrade',
+    plm_upgrade_expertise: 'plm_upgrade_expertise',
+    plm_upgrade_experience: 'plm_upgrade_experience',
     plm_cad_integration: 'plm_cad_integration',
     plm_cad_integration_expertise: 'plm_cad_integration_expertise',
     plm_cad_integration_experience: 'plm_cad_integration_experience',
@@ -127,7 +137,13 @@ const frontendToBackendKeyMap = {
     project_delivery_years: 'project_delivery_years',
     project_delivery_experience: 'project_delivery_experience',
     certifications_in_progress: 'certifications_in_progress',
-    special_call_out: 'special_call_out'
+    special_call_out: 'special_call_out',
+    plm_testing_expertise: 'plm_testing_expertise',
+    plm_testing_experience: 'plm_testing_experience',
+    plm_support_expertise: 'plm_support_expertise',
+    plm_support_experience: 'plm_support_experience',
+    plm_integration_expertise: 'plm_integration_expertise',
+    plm_integration_experience: 'plm_integration_experience'
 };
 
 const transformDataForBackend = (frontendData) => {
@@ -156,9 +172,13 @@ const AddPage = () => {
     const [plmAdminExpertiseOptions, setPlmAdminExpertiseOptions] = useState([]);
     const [plmCadExpertiseOptions, setPlmCadExpertiseOptions] = useState([]);
     const [projectDeliveryModelOptions, setProjectDeliveryModelOptions] = useState([]);
+    const [plmUpgradeExpertiseOptions, setPlmUpgradeExpertiseOptions] = useState([]);
+    const [plmTestingExpertiseOptions, setPlmTestingExpertiseOptions] = useState([]);
+    const [plmSupportExpertiseOptions, setPlmSupportExpertiseOptions] = useState([]);
+    const [plmIntegrationExpertiseOptions, setPlmIntegrationExpertiseOptions] = useState([]);
 
     const stepFields = {
-        1: ['name', 'email_address', 'enterprise_id', 'management_level', 'work_location', 'project', 'designation', 'current_role'],
+        1: ['name', 'email_address', 'enterprise_id', 'management_level', 'work_location', 'project', 'job_profile', 'current_role'],
         2: ['overall_experience_years', 'overall_experience_months', 'primary_skill', 'additional_skills', 'project_delivery_model', 'plm_development', 'industry_knowledge', 'automation_skills', 'cloud_knowledge', 'devops_skills', 'sw_engineering', 'project_management', 'plm_testing', 'plm_support', 'plm_admin', 'plm_upgrade', 'plm_cad_integration', 'plm_interfaceintegration', 'plm_sap_integration', 'tc_manufacturing', 'plmqms_integration', 'plm_functional', 'plm_migration', 'plm_product_configurators', 'active_workspace_customization', 'teamcenter_module_experience'],
         3: ['external_certifications__completed_along_with_completion__expiry_date', 'certifications_in_progress', 'special_call_out']
     };
@@ -167,20 +187,22 @@ const AddPage = () => {
         work_location: [],
         cloud_knowledge: [],
         project: [],
-        designation: [],
-        project_delivery_model: []
+        job_profile: [],
+        project_delivery_model: [], 
+        devops_skills: []
     });
 
     useEffect(() => {
         const fetchDropdowns = async () => {
             try {
-                const [rolesRes, cloudRes, locationsRes, projectsRes, designationRes, projectDeliveryRes] = await Promise.all([
+                const [rolesRes, cloudRes, locationsRes, projectsRes, designationRes, projectDeliveryRes, developSkillsRes] = await Promise.all([
                     axios.get(`${API_BASE_URL}/api/current-role`),
                     axios.get(`${API_BASE_URL}/api/cloud-knowledge`),
                     axios.get(`${API_BASE_URL}/api/work-location`),
                     axios.get(`${API_BASE_URL}/api/project`),
                     axios.get(`${API_BASE_URL}/api/designation`),
-                    axios.get(`${API_BASE_URL}/api/project-delivery-models`)
+                    axios.get(`${API_BASE_URL}/api/project-delivery-models`),
+                    axios.get(`${API_BASE_URL}/api/devops-skills`)
                 ]);
 
                 setDropdownData(prev => ({
@@ -189,8 +211,9 @@ const AddPage = () => {
                     cloud_knowledge: cloudRes.data.data,
                     work_location: locationsRes.data.data,
                     project: projectsRes.data.data,
-                    designation: designationRes.data.data,
-                    project_delivery_model: projectDeliveryRes.data
+                    job_profile: designationRes.data.data,
+                    project_delivery_model: projectDeliveryRes.data,
+                    devops_skills: developSkillsRes.data.data
                 }));
             } catch (err) {
                 console.error("Error fetching dropdown data:", err);
@@ -202,7 +225,7 @@ const AddPage = () => {
 
     useEffect(() => {
         if (formData.plm_development && formData.plm_development !== 'None') {
-            axios.get(`${API_BASE_URL}/api/plm-admin-expertise/`).then(res => {
+            axios.get(`${API_BASE_URL}/api/plm-dev-expertise/`).then(res => {
                 setPlmDevExpertiseOptions(res.data.data || []);
             }).catch(() => setPlmDevExpertiseOptions([]));
         } else {
@@ -253,9 +276,72 @@ const AddPage = () => {
         }
     }, [formData.project_delivery_model]);
 
+    useEffect(() => {
+        if (formData.plm_upgrade && formData.plm_upgrade !== 'None') {
+            axios.get(`${API_BASE_URL}/api/plm-upgrade-expertise/`).then(res => {
+                setPlmUpgradeExpertiseOptions(res.data.data || []);
+            }).catch(() => setPlmUpgradeExpertiseOptions([]));
+        } else {
+            setFormData(prev => ({ ...prev, plm_upgrade_expertise: '', plm_upgrade_experience: '' }));
+            setPlmUpgradeExpertiseOptions([]);
+        }
+    }, [formData.plm_upgrade]);
+
+    useEffect(() => {
+        if (formData.plm_testing && formData.plm_testing !== 'None') {
+            axios.get(`${API_BASE_URL}/api/plm-testing-expertise`).then(res => {
+                setPlmTestingExpertiseOptions(res.data.data || []);
+            }).catch(() => setPlmTestingExpertiseOptions([]));
+        } else {
+            setFormData(prev => ({ ...prev, plm_testing_expertise: '', plm_testing_experience: '' }));
+            setPlmTestingExpertiseOptions([]);
+        }
+    }, [formData.plm_testing]);
+
+    useEffect(() => {
+        if (formData.plm_support && formData.plm_support !== 'None') {
+            axios.get(`${API_BASE_URL}/api/plm-support-expertise`).then(res => {
+                setPlmSupportExpertiseOptions(res.data.data || []);
+            }).catch(() => setPlmSupportExpertiseOptions([]));
+        } else {
+            setFormData(prev => ({ ...prev, plm_support_expertise: '', plm_support_experience: '' }));
+            setPlmSupportExpertiseOptions([]);
+        }
+    }, [formData.plm_support]);
+
+    useEffect(() => {
+        if (formData.plm_interfaceintegration && formData.plm_interfaceintegration !== 'None') {
+            axios.get(`${API_BASE_URL}/api/plm-integration-expertise`).then(res => {
+                setPlmIntegrationExpertiseOptions(res.data.data || []);
+            }).catch(() => setPlmIntegrationExpertiseOptions([]));
+        } else {
+            setFormData(prev => ({ ...prev, plm_integration_expertise: '', plm_integration_experience: '' }));
+            setPlmIntegrationExpertiseOptions([]);
+        }
+    }, [formData.plm_interfaceintegration]);
+
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        
+        if (type === 'checkbox' && name === 'plm_development_expertise') {
+            // Handle multiple selection for PLM Development Expertise
+            setFormData(prev => {
+                const currentValues = prev[name] ? prev[name].split(',').filter(v => v.trim()) : [];
+                let newValues;
+                
+                if (checked) {
+                    // Add value if not already present
+                    newValues = [...currentValues, value];
+                } else {
+                    // Remove value if present
+                    newValues = currentValues.filter(v => v !== value);
+                }
+                return { ...prev, [name]: newValues.join(', ') };
+            });
+        } else {
+            setFormData((prev) => ({ ...prev, [name]: value }));
+        }
+        
         if (submitStatus.message && submitStatus.type === 'error') {
             setSubmitStatus({ message: '', type: '' });
         }
@@ -309,7 +395,7 @@ const AddPage = () => {
         const schemaRequiredFrontendKeys = {
             'name': 'Name', 'email_address': 'Email Address', 'enterprise_id': 'Enterprise-id', 'primary_skill': 'Primary Skill',
             'additional_skills': 'Additional Skills', 'management_level': 'Management Level',
-            'work_location': 'Work Location', 'project': 'Project', 'designation': 'Designation',
+            'work_location': 'Work Location', 'project': 'Project', 'job_profile': 'Designation',
             'overall_experience_years': 'Overall Experience (Years)',
             'overall_experience_months': 'Overall Experience (Months)',
             'current_role': 'Current Role'
@@ -335,7 +421,7 @@ const AddPage = () => {
         const payload = transformDataForBackend(formData);
 
         try {
-            await axios.post(`${API_BASE_URL}/api/batchmates`, payload);
+            await axios.post(`${API_BASE_URL}/api/batchmates/add`, payload);
             alert('Batchmate added successfully! Click OK to return to the homepage.');
             setFormData(Object.keys(fieldLabels).reduce((acc, key) => ({ ...acc, [key]: '' }), {}));
             setStepChanging(true);
@@ -472,18 +558,47 @@ const AddPage = () => {
         }}>
             <div style={{ marginBottom: '15px', marginTop: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px' }}>{expertiseLabel}</label>
-                <select
-                    name={expertiseField}
-                    value={formData[expertiseField]}
-                    onChange={handleChange}
-                    style={{ width: '99%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
-                    disabled={submitting || stepChanging}
-                >
-                    <option value="">Select...</option>
-                    {expertiseOptions.map((opt, idx) => (
-                        <option key={opt._id || idx} value={opt.value}>{opt.value}</option>
-                    ))}
-                </select>
+                {expertiseField === 'plm_development_expertise' ? (
+                    // Multiple selection for PLM Development Expertise
+                    <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid #ccc', borderRadius: '5px', padding: '10px' }}>
+                        {expertiseOptions.map((opt, idx) => {
+                            const optionValue = opt.value || opt;
+                            const currentValues = formData[expertiseField] ? formData[expertiseField].split(',').map(v => v.trim()) : [];
+                            const isChecked = currentValues.includes(optionValue);
+                            
+                            return (
+                                <div key={opt._id || idx} style={{ marginBottom: '8px' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            name={expertiseField}
+                                            value={optionValue}
+                                            checked={isChecked}
+                                            onChange={handleChange}
+                                            style={{ marginRight: '8px' }}
+                                            disabled={submitting || stepChanging}
+                                        />
+                                        <span>{optionValue}</span>
+                                    </label>
+                                </div>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    // Single selection for other fields
+                    <select
+                        name={expertiseField}
+                        value={formData[expertiseField]}
+                        onChange={handleChange}
+                        style={{ width: '99%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
+                        disabled={submitting || stepChanging}
+                    >
+                        <option value="">Select...</option>
+                        {expertiseOptions.map((opt, idx) => (
+                            <option key={opt._id || idx} value={opt.value}>{opt.value}</option>
+                        ))}
+                    </select>
+                )}
             </div>
             <div style={{ marginBottom: '15px' }}>
                 <label style={{ display: 'block', marginBottom: '5px' }}>{experienceLabel}</label>
@@ -623,6 +738,42 @@ const AddPage = () => {
                             experienceField: 'plm_cad_integration_experience',
                             expertiseLabel: fieldLabels['plm_cad_integration_expertise'],
                             experienceLabel: fieldLabels['plm_cad_integration_experience']
+                        })}
+                        {/* Render PLM Upgrade extra fields if plm_upgrade is not None */}
+                        {fieldName === 'plm_upgrade' && formData.plm_upgrade && formData.plm_upgrade !== 'None' && renderPlmExtraFields({
+                            labelPrefix: 'PLM Upgrade',
+                            expertiseOptions: plmUpgradeExpertiseOptions,
+                            expertiseField: 'plm_upgrade_expertise',
+                            experienceField: 'plm_upgrade_experience',
+                            expertiseLabel: fieldLabels['plm_upgrade_expertise'],
+                            experienceLabel: fieldLabels['plm_upgrade_experience']
+                        })}
+                        {/* Render PLM Testing extra fields if plm_testing is not None */}
+                        {fieldName === 'plm_testing' && formData.plm_testing && formData.plm_testing !== 'None' && renderPlmExtraFields({
+                            labelPrefix: 'PLM Testing',
+                            expertiseOptions: plmTestingExpertiseOptions,
+                            expertiseField: 'plm_testing_expertise',
+                            experienceField: 'plm_testing_experience',
+                            expertiseLabel: fieldLabels['plm_testing_expertise'],
+                            experienceLabel: fieldLabels['plm_testing_experience']
+                        })}
+                        {/* Render PLM Support extra fields if plm_support is not None */}
+                        {fieldName === 'plm_support' && formData.plm_support && formData.plm_support !== 'None' && renderPlmExtraFields({
+                            labelPrefix: 'PLM Support',
+                            expertiseOptions: plmSupportExpertiseOptions,
+                            expertiseField: 'plm_support_expertise',
+                            experienceField: 'plm_support_experience',
+                            expertiseLabel: fieldLabels['plm_support_expertise'],
+                            experienceLabel: fieldLabels['plm_support_experience']
+                        })}
+                        {/* Render PLM Integration extra fields if plm_interfaceintegration is not None */}
+                        {fieldName === 'plm_interfaceintegration' && formData.plm_interfaceintegration && formData.plm_interfaceintegration !== 'None' && renderPlmExtraFields({
+                            labelPrefix: 'PLM Integration',
+                            expertiseOptions: plmIntegrationExpertiseOptions,
+                            expertiseField: 'plm_integration_expertise',
+                            experienceField: 'plm_integration_experience',
+                            expertiseLabel: fieldLabels['plm_integration_expertise'],
+                            experienceLabel: fieldLabels['plm_integration_experience']
                         })}
                         {/* Render Project Delivery Model extra fields if project_delivery_model is selected */}
                         {fieldName === 'project_delivery_model' && formData.project_delivery_model && formData.project_delivery_model !== '' && renderProjectDeliveryExtraFields()}

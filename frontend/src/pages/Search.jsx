@@ -1,44 +1,54 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import Navbar from '../components/Navbar';
 
 const API_BASE_URL = 'http://localhost:5000';
 
-const ResultCard = ({ name, email, onClick }) => (
+const ResultCard = ({ name, email, batchmateId, onClick, userRole }) => (
   <div
+    onClick={onClick}
     style={{
-      border: '1px solid #e0e0e0',
-      padding: '16px',
-      borderRadius: '10px',
       backgroundColor: '#fff',
-      boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-      transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-      height: '150px',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      textAlign: 'center',
+      padding: '20px',
+      borderRadius: '8px',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
       cursor: 'pointer',
+      transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+      border: '1px solid #e0e0e0'
     }}
-    onClick={onClick} // This directly calls the function passed from the parent.
-    onMouseEnter={(e) => {
-      e.currentTarget.style.transform = 'translateY(-4px)';
-      e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.15)';
+    onMouseEnter={e => {
+      e.currentTarget.style.transform = 'translateY(-2px)';
+      e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.15)';
     }}
-    onMouseLeave={(e) => {
+    onMouseLeave={e => {
       e.currentTarget.style.transform = 'translateY(0)';
-      e.currentTarget.style.boxShadow = '0 2px 6px rgba(0, 0, 0, 0.1)';
+      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
     }}
   >
-    <h3 style={{ margin: '0 0 8px', fontFamily: 'Segoe UI, sans-serif', color: '#333' }}>{name}</h3>
-    <p style={{ margin: 0, color: '#555', fontFamily: 'Roboto, sans-serif' }}>{email}</p>
+    <h3 style={{ 
+      margin: '0 0 8px 0', 
+      color: '#333',
+      fontSize: '18px',
+      fontWeight: '600'
+    }}>
+      {name}
+    </h3>
+    <p style={{ 
+      margin: '0', 
+      color: '#666',
+      fontSize: '14px'
+    }}>
+      {email}
+    </p>
   </div>
 );
 
 // This is the main Search component, which contains all the state and logic.
 export default function Search() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [results, setResults] = useState([]);
@@ -110,58 +120,62 @@ export default function Search() {
   };
 
   return (
-    <div style={{ padding: '40px 20px', backgroundColor: '#f9f9f9', minHeight: '100vh', textAlign: 'center' }}>
-      <input
-        type="text"
-        placeholder="Search by name..."
-        value={searchTerm}
-        onChange={handleInputChange}
-        style={{
-          padding: '12px 16px',
-          width: '100%',
-          maxWidth: '400px',
-          margin: '0 auto 30px',
-          display: 'block',
-          borderRadius: '8px',
-          border: '1px solid #ccc',
-          fontSize: '16px',
-          fontFamily: 'Segoe UI, sans-serif',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        }}
-      />
+    <div style={{ fontFamily: '"Segoe UI", sans-serif' }}>
+      <Navbar />
+      <div style={{ padding: '40px 20px', backgroundColor: '#f9f9f9', minHeight: '100vh', textAlign: 'center' }}>
+        <input
+          type="text"
+          placeholder="Search by name..."
+          value={searchTerm}
+          onChange={handleInputChange}
+          style={{
+            padding: '12px 16px',
+            width: '100%',
+            maxWidth: '400px',
+            margin: '0 auto 30px',
+            display: 'block',
+            borderRadius: '8px',
+            border: '1px solid #ccc',
+            fontSize: '16px',
+            fontFamily: 'Segoe UI, sans-serif',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          }}
+        />
 
-      {loading && (
-        <p style={{ fontFamily: 'Segoe UI, sans-serif', color: '#555' }}>Loading...</p>
-      )}
+        {loading && (
+          <p style={{ fontFamily: 'Segoe UI, sans-serif', color: '#555' }}>Loading...</p>
+        )}
 
-      {error && (
-        <p style={{ fontFamily: 'Segoe UI, sans-serif', color: 'red' }}>{error}</p>
-      )}
+        {error && (
+          <p style={{ fontFamily: 'Segoe UI, sans-serif', color: 'red' }}>{error}</p>
+        )}
 
-      {!loading && !error && results.length > 0 && (
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '20px',
-            maxWidth: '1200px',
-            margin: '0 auto',
-            padding: '0 10px',
-          }}>
-          {results.map((batchmate) => (
-            <ResultCard
-              key={batchmate._id} // The key should always be a stable, unique ID
-              name={batchmate.name}
-              email={batchmate.email_address}
-              // CORRECTED: The onClick prop now calls the correct handler with the full email address
-              onClick={() => handleCardClick(batchmate.email_address)}
-            />
-          ))}
-        </div>
-      )}
+        {!loading && !error && results.length > 0 && (
+          <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '20px',
+              maxWidth: '1200px',
+              margin: '0 auto',
+              padding: '0 10px',
+            }}>
+            {results.map((batchmate) => (
+              <ResultCard
+                key={batchmate._id}
+                name={batchmate.name}
+                email={batchmate.email_address}
+                batchmateId={batchmate._id}
+                onClick={() => handleCardClick(batchmate.email_address)}
+                userRole={user?.role}
+              />
+            ))}
+          </div>
+        )}
 
-      {!loading && !error && results.length === 0 && message && (
-        <p style={{ fontFamily: 'Segoe UI, sans-serif', color: '#555' }}>{message}</p>
-      )}
+        {!loading && !error && results.length === 0 && message && (
+          <p style={{ fontFamily: 'Segoe UI, sans-serif', color: '#555' }}>{message}</p>
+        )}
+      </div>
     </div>
   );
 }

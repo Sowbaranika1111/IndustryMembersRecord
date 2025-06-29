@@ -6,6 +6,8 @@ import Profile from './pages/Profile';
 import Navbar from './components/Navbar';
 import Add from './pages/Add';
 import Login from './pages/Login';
+import EditUser from './pages/EditUser';
+import EditAdmin from './pages/EditAdmin';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import './app.css';
@@ -50,6 +52,22 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute userRole={user?.role} userEnterpriseId={user?.enterpriseId}>
             <Add />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/edit-user/:emailId"
+        element={
+          <ProtectedRoute userRole={user?.role} userEnterpriseId={user?.enterpriseId}>
+            <EditUser />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/edit-admin/:emailId"
+        element={
+          <ProtectedRoute userRole={user?.role} userEnterpriseId={user?.enterpriseId}>
+            <EditAdmin />
           </ProtectedRoute>
         }
       />

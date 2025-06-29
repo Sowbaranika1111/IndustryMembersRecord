@@ -14,9 +14,17 @@ const ProtectedRoute = ({ children, allowedRoles, userRole, userEnterpriseId }) 
     return children;
   }
 
-  // For non-admin users, check if they're trying to access their own profile
+  // For non-admin users, check if they're trying to access their own profile or edit pages
   if (location.pathname.startsWith('/profile/')) {
     const requestedEnterpriseId = location.pathname.split('/profile/')[1];
+    if (requestedEnterpriseId === userEnterpriseId) {
+      return children;
+    }
+  }
+
+  // Check edit routes - users can only edit their own profiles
+  if (location.pathname.startsWith('/edit-user/') || location.pathname.startsWith('/edit-admin/')) {
+    const requestedEnterpriseId = location.pathname.split('/').pop(); // Get the enterprise ID from the end of the URL
     if (requestedEnterpriseId === userEnterpriseId) {
       return children;
     }
