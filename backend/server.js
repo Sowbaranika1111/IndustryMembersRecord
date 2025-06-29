@@ -110,11 +110,11 @@ const projectDeliveryModels = require("./routes/projectDeliveryModelsRoutes.js")
 app.use("/api/project-delivery-models",projectDeliveryModels);
 //plm Integration Expertise
 const plmIntegrationExpertise = require("./routes/plmIntegrationRoutes.js");
-app.use("/api/plm-integration",plmIntegrationExpertise);
+app.use("/api/plm-integration-expertise",plmIntegrationExpertise);
 
 //plm Support Expertise
 const plmSupportExpertise = require("./routes/plmSupportRoutes.js");
-app.use("/api/plm-support",plmSupportExpertise);
+app.use("/api/plm-support-expertise",plmSupportExpertise);
 
 //! Login Admin Routes
 

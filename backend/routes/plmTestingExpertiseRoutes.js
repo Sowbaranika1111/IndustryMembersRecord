@@ -23,7 +23,7 @@ router.put("/update/:id", updatePLMTestingExpertiseById);
 router.delete("/delete/:id", deletePLMTestingExpertiseById);
 
 // DELETE all PLM testing expertise entries
-router.delete("/deleteall", deleteAllPLMTestingExpertise);
+router.delete("/delete-all", deleteAllPLMTestingExpertise);
 
 // POST multiple PLM testing expertise values
 router.post("/insert-many", bulkInsertPLMTestingExpertise);

@@ -23,7 +23,7 @@ router.put("/update/:id", updatePLMSupportExpertise);
 router.delete("/delete/:id", deletePLMSupportExpertise);
 
 // DELETE all PLM support expertise entries
-router.delete("/deleteall", deleteAllPLMSupportExpertise);
+router.delete("/delete-all", deleteAllPLMSupportExpertise);
 
 // POST multiple PLM support expertise values
 router.post("/insert-many", bulkInsertPLMSupportExpertise);

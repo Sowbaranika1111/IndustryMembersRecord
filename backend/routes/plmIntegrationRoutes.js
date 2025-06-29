@@ -23,7 +23,7 @@ router.put("/update/:id", updatePLMIntegrationExpertiseById);
 router.delete("/delete/:id", deletePLMIntegrationExpertiseById);
 
 // DELETE all PLM integration expertise entries
-router.delete("/deleteall", deleteAllPLMIntegrationExpertise);
+router.delete("/delete-all", deleteAllPLMIntegrationExpertise);
 
 // POST multiple PLM integration expertise values
 router.post("/insert-many", bulkInsertPLMIntegrationExpertise);
