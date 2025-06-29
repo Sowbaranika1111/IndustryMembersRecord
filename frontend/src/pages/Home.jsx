@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import industryXBG from '../assets/image.png';
 
 export default function Home() {
@@ -11,6 +12,8 @@ export default function Home() {
 
   return (
     <div style={{ fontFamily: '"Segoe UI", sans-serif' }}>
+      <Navbar />
+      
       {/* Header Section */}
       <div style={{
         position: 'relative',
@@ -80,7 +83,7 @@ export default function Home() {
         <div style={{ flex: 2, minWidth: '300px' }}>
           <h2 style={{ color: '#6a0dad' }}>About Industry X</h2>
           <p style={{ fontSize: '16px', lineHeight: '1.6' }}>
-            Industry X is Accenture’s digital transformation initiative focused on smart manufacturing,
+            Industry X is Accenture's digital transformation initiative focused on smart manufacturing,
             connected products, and the future of operations. We combine innovation, technology, and
             engineering to transform traditional industries and build more agile, efficient, and
             sustainable operations.

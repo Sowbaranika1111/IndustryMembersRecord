@@ -1,15 +1,15 @@
 const {Designation} = require("../../models/dropdownValuesModel");
-const Batchmate = require('../../models/Batchmate');
+const {Batchmate} = require("../../models/Batchmate");
 
 const updateDesignation = async (req, res) => {
   try {
-    // 1. Get the ID of the batchmate from the URL parameters
-    const batchmateId = req.params.id;
+    // 1. Get the batchmate ID from the request parameters.
+    const { id } = req.params;
 
     // 2. Get the new designation string from the request's body.
     const { designation } = req.body;
 
-    // Validate input
+    // 3. Validate the input
     if (!designation) {
       return res.status(400).json({
         success: false,
@@ -17,65 +17,68 @@ const updateDesignation = async (req, res) => {
       });
     }
 
-    // --- SMART LOGIC STARTS HERE ---
-    // 3. Check if this Designation already exists in the `Designations` collection.
-    // We search by the 'name' field from our recommended schema.
-    let designationExists = await Designation.findOne({ name: designation });
-    let wasDesignationCreated = false;
+    // 4. Check if this Designation already exists in the `Designations` collection.
+    try {
+      let designationExists = await Designation.findOne({ name: designation });
+      let wasDesignationCreated = false;
 
-    // 4. If the Designation does NOT exist, create it.
-    if (!designationExists) {
-      console.log(`Designation "${designation}" not found. Creating it now...`);
+      // 5. If the Designation does NOT exist, create it.
+      if (!designationExists) {
+        console.log(`Designation "${designation}" not found. Creating it now...`);
 
-      // Find the highest existing numeric 'id' to generate a new unique one.
-      const lastDesignation = await Designation.findOne().sort({ id: -1 });
-      const newId = lastDesignation ? lastDesignation.id + 1 : 1;
+        // Get the highest ID and increment by 1
+        const lastDesignation = await Designation.findOne().sort({ id: -1 });
+        const newId = lastDesignation ? lastDesignation.id + 1 : 1;
 
-      // Create the new Designation document in the 'Designations' collection
-      await Designation.create({
-        id: newId,
-        name: designation, // Using 'name' as defined in our schema
+        // Create the new Designation document in the 'Designations' collection
+        await Designation.create({
+          id: newId,
+          name: designation, // Using 'name' as defined in our schema
+        });
+        wasDesignationCreated = true;
+        console.log(`Successfully created new Designation: "${designation}"`);
+      }
+
+      // 6. Now, update the batchmate with the new designation string.
+      // Assuming the field in the Batchmate model is also called 'designation'.
+      const updatedBatchmate = await Batchmate.findByIdAndUpdate(
+        id,
+        { job_profile: designation }, // The data to update
+        { new: true, runValidators: true }
+      );
+
+      if (!updatedBatchmate) {
+        return res.status(404).json({
+          success: false,
+          message: 'Batchmate not found',
+        });
+      }
+
+      // 7. Return success response
+      return res.status(200).json({
+        success: true,
+        message: `Batchmate Designation updated. ${wasDesignationCreated ? 'A new Designation was also created in the database.' : ''}`.trim(),
+        data: updatedBatchmate,
       });
-      wasDesignationCreated = true;
-      console.log(`Successfully created new Designation: "${designation}"`);
-    }
-    // --- SMART LOGIC ENDS HERE ---
 
-    // 5. Now, update the batchmate with the new designation string.
-    // Assuming the field in the Batchmate model is also called 'designation'.
-    const updatedBatchmate = await Batchmate.findByIdAndUpdate(
-      batchmateId,
-      { designation: designation }, // The data to update
-      { new: true, runValidators: true } // Options: return the updated doc and run schema validators
-    );
-
-    // Check if the batchmate was found
-    if (!updatedBatchmate) {
-      return res.status(404).json({
+    } catch (error) {
+      console.error('Error in updateDesignation handler:', error);
+      return res.status(500).json({
         success: false,
-        message: `Batchmate not found with id: ${batchmateId}`,
+        message: 'Internal server error',
       });
     }
-
-    // 6. Send a successful response with a clear message.
-    res.status(200).json({
-      success: true,
-      // The message dynamically changes based on whether a new designation was created.
-      message: `Batchmate Designation updated. ${wasDesignationCreated ? 'A new Designation was also created in the database.' : ''}`.trim(),
-      data: updatedBatchmate,
-    });
-
   } catch (error) {
     console.error('Error in updateDesignation handler:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: 'Server Error'
+      message: 'Internal server error',
     });
   }
 };
 
 //getAllDesignations
-
+// This function retrieves all designations from the database
 const getAllDesignations = async (req, res) => {
   try {
     // 1. Call your database logic to fetch the data from the 'designations' collection
@@ -83,46 +86,40 @@ const getAllDesignations = async (req, res) => {
 
     // 2. Check if any designations were found (optional but good practice)
     if (!designations || designations.length === 0) {
-      // Respond with 404 Not Found if the collection is empty
-      return res.status(404).json({
-        success: false,
+      return res.status(200).json({
+        success: true,
         message: "No designations found",
+        count: 0,
+        data: [],
       });
     }
 
-    // 3. Send a SUCCESS response
-    // Status 200 means OK.
-    // We send a JSON object containing the data.
-    res.status(200).json({
+    // 3. Return the designations in the response
+    return res.status(200).json({
       success: true,
+      message: "Designations retrieved successfully",
       count: designations.length,
       data: designations,
     });
 
   } catch (error) {
-    // 4. If any error occurs in the 'try' block, this 'catch' block will run
     console.error("Server Error in getAllDesignations:", error);
-
-    // 5. Send an ERROR response
-    // Status 500 means Internal Server Error.
-    // We send a generic error message to the client for security.
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error",
     });
   }
 };
-//Deleting all the Designations
 
+//Deleting all the Designations
+// This function deletes all designations from the database
 const deleteAllDesignations = async (req, res) => {
   try {
-    // 1. Call the database logic to delete all documents.
-    // The result object contains info like `deletedCount`.
+    // 1. Delete all documents from the Designations collection
     const deletionResult = await Designation.deleteMany({});
 
-    // 2. Check how many documents were deleted.
+    // 2. Check if any documents were actually deleted
     if (deletionResult.deletedCount === 0) {
-      // This is a success case, but we inform the user the collection was already empty.
       return res.status(200).json({
         success: true,
         message: "No designations found to delete. The collection was already empty.",
@@ -130,19 +127,16 @@ const deleteAllDesignations = async (req, res) => {
       });
     }
 
-    // 3. Send a SUCCESS response confirming the deletion.
-    res.status(200).json({
+    // 3. Return success response with the count of deleted documents
+    return res.status(200).json({
       success: true,
       message: `Successfully deleted all ${deletionResult.deletedCount} designations.`,
       deletedCount: deletionResult.deletedCount,
     });
 
   } catch (error) {
-    // 4. If any database error occurs, this 'catch' block will run.
     console.error("Server Error in deleteAllDesignations:", error);
-
-    // 5. Send an ERROR response.
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: "Internal Server Error while trying to delete designations.",
     });
@@ -150,67 +144,69 @@ const deleteAllDesignations = async (req, res) => {
 };
 
 //inserting bulk designations
+// This function inserts multiple designations at once
 const insertAllDesignations = async (req, res) => {
   try {
-    // 1. VALIDATE INPUT: Expects a simple array of strings.
-    const values = req.body;
-    if (!Array.isArray(values) || values.length === 0) {
+    // 1. Get the array of designation names from the request body
+    const { designations } = req.body;
+
+    // 2. Validate the input
+    if (!Array.isArray(designations) || designations.length === 0) {
       return res.status(400).json({
         success: false,
         error: "Request body must be a non-empty array of designation names.",
       });
     }
 
-    // 2. NORMALIZE DATA: Clean up the input by trimming whitespace,
+    // 3. Clean and validate the input data
     // filtering out empty values, and keeping only unique designation names.
-    const uniqueInputValues = [...new Set(
-        values.map(v => String(v).trim()).filter(Boolean)
-    )];
+    const uniqueInputValues = [...new Set(designations.filter(name => name && name.trim() !== ''))];
 
     if (uniqueInputValues.length === 0) {
       return res.status(400).json({ success: false, error: "No valid designation names provided after filtering." });
     }
 
-    // 3. CHECK FOR DUPLICATES: Efficiently find which of the designations
-    // already exist in the database.
+    // 4. CHECK FOR DUPLICATES: Efficiently find which of the designations
+    // already exist in the database
     const existingDocs = await Designation.find({ value: { $in: uniqueInputValues } });
-    const existingValues = new Set(existingDocs.map(doc => doc.value));
+    const existingValues = existingDocs.map(doc => doc.value);
 
-    // 4. PREPARE NEW DESIGNATIONS: Filter the input to get only the designations
-    // that are genuinely new.
-    const newValuesToInsert = uniqueInputValues.filter(val => !existingValues.has(val));
-    const alreadyExistCount = uniqueInputValues.length - newValuesToInsert.length;
+    // 5. PREPARE NEW DESIGNATIONS: Filter the input to get only the designations
+    // that don't already exist
+    const newDesignations = uniqueInputValues.filter(value => !existingValues.includes(value));
 
     // If there are no new designations to add, we're done. This is a success.
-    if (newValuesToInsert.length === 0) {
+    if (newDesignations.length === 0) {
       return res.status(200).json({
         success: true,
         message: "No new designations were added as all provided designations already exist.",
-        totalProvided: uniqueInputValues.length,
-        inserted: 0,
-        alreadyExists: alreadyExistCount,
+        addedCount: 0,
+        existingCount: existingValues.length,
       });
     }
 
-    // 5. INSERT: Prepare the new documents and insert them in one go.
-    // The documents only need the 'value' field.
-    const documentsToInsert = newValuesToInsert.map(value => ({ value }));
+    // 6. INSERT NEW DESIGNATIONS: Prepare documents for insertion
+    const documentsToInsert = newDesignations.map((name, index) => ({
+      id: Date.now() + index, // Simple ID generation
+      value: name,
+      name: name,
+    }));
+
+    // 7. Insert the new designations
     const inserted = await Designation.insertMany(documentsToInsert);
 
-    // 6. RESPOND: Send a clear, detailed success response.
-    res.status(201).json({
+    // 8. Return success response
+    return res.status(201).json({
       success: true,
       message: `Successfully added ${inserted.length} new designation(s).`,
-      totalProvided: uniqueInputValues.length,
-      inserted: inserted.length,
-      alreadyExists: alreadyExistCount,
-      insertedValues: inserted.map(doc => doc.value),
+      addedCount: inserted.length,
+      existingCount: existingValues.length,
+      data: inserted,
     });
 
   } catch (err) {
-    // This will catch any unexpected server or database errors.
     console.error("Error in addDesignations:", err);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       error: "An internal server error occurred while adding designations.",
     });

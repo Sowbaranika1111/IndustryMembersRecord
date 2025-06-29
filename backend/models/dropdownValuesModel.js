@@ -172,8 +172,6 @@ const projectDeliveryModelsSchema = new mongoose.Schema({
     ProjectDeliveryModels: mongoose.model("ProjectDeliveryModels",projectDeliveryModelsSchema),
     PLMIntegrationExpertise: mongoose.model("PLMIntegrationExpertise",plmIntegrationExpertiseSchema),
     PLMSupportExpertise: mongoose.model("PLMSupportExpertise",plmSupportExpertiseSchema),
-    PLMTestingExpertise: mongoose.model("PLMTestingExpertise", plmTestingExpertiseSchema),
-    PLMCADintegrations: mongoose.model("PLMCADintegrations",plmCadIntegrationSchema),
     PLMSapExpertise: mongoose.model("PLMSapExpertise",plmSapExpertiseSchema),
     // IndustryKnowledge: mongoose.model("IndustryKnowledge", industryKnowledgeSchema),
   };
