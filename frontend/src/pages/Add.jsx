@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const accenturePurple = '#6a0dad';
 const API_BASE_URL = 'http://localhost:5000';
@@ -161,6 +162,7 @@ const transformDataForBackend = (frontendData) => {
 
 const AddPage = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState(
         Object.keys(fieldLabels).reduce((acc, key) => ({ ...acc, [key]: '' }), {})
@@ -362,6 +364,7 @@ const AddPage = () => {
                     return;
                 }
             }
+            setSubmitStatus({ message: 'Step 1 completed! Moving to Skills section...', type: 'success' });
         } else if (step === 2) {
             const step2MandatoryKeys = ['overall_experience_years', 'overall_experience_months', 'primary_skill'];
             for (const fieldKey of step2MandatoryKeys) {
@@ -371,8 +374,13 @@ const AddPage = () => {
                     return;
                 }
             }
+            setSubmitStatus({ message: 'Step 2 completed! Moving to Additional Information section...', type: 'success' });
         }
-        setStep((prev) => prev + 1);
+        
+        setTimeout(() => {
+            setStep((prev) => prev + 1);
+            setStepChanging(false);
+        }, 1000);
     };
 
     const handlePrev = () => {
@@ -422,11 +430,20 @@ const AddPage = () => {
 
         try {
             await axios.post(`${API_BASE_URL}/api/batchmates/add`, payload);
-            alert('Batchmate added successfully! Click OK to return to the homepage.');
+            alert('Batchmate added successfully! Click OK to view your profile.');
             setFormData(Object.keys(fieldLabels).reduce((acc, key) => ({ ...acc, [key]: '' }), {}));
             setStepChanging(true);
             setStep(1);
-            navigate('/');
+            
+            // Redirect to profile page based on user role
+            if (user && user.role === 'admin') {
+                navigate('/home');
+            } else if (user && user.email) {
+                const userEnterpriseId = user.email.split('@')[0];
+                navigate(`/profile/${userEnterpriseId}`);
+            } else {
+                navigate('/home');
+            }
         } catch (error) {
             let errorMessage = 'Failed to add batchmate. Please try again.';
             if (error.response) {
@@ -690,6 +707,38 @@ const AddPage = () => {
                 </div>
             </div>
 
+            {/* Progress Indicator */}
+            <div style={{ 
+                marginBottom: '20px', 
+                padding: '10px', 
+                backgroundColor: '#f8f9fa', 
+                borderRadius: '5px',
+                border: '1px solid #dee2e6'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontWeight: 'bold', color: accenturePurple }}>
+                        Step {step} of 3: {step === 1 ? 'Basic Information' : step === 2 ? 'Skills & Experience' : 'Additional Information'}
+                    </span>
+                    <span style={{ color: '#6c757d' }}>
+                        {step === 3 ? 'Ready to submit!' : `${Math.round((step / 3) * 100)}% Complete`}
+                    </span>
+                </div>
+                <div style={{ 
+                    marginTop: '8px', 
+                    height: '4px', 
+                    backgroundColor: '#e9ecef', 
+                    borderRadius: '2px',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{ 
+                        width: `${(step / 3) * 100}%`, 
+                        height: '100%', 
+                        backgroundColor: accenturePurple,
+                        transition: 'width 0.4s ease-in-out'
+                    }} />
+                </div>
+            </div>
+
             {/* Form Content */}
             <form onSubmit={handleSubmit} style={{
                 backgroundColor: '#fff', padding: '20px', borderRadius: '8px',
@@ -792,7 +841,7 @@ const AddPage = () => {
                             }}
                             disabled={submitting || stepChanging}
                         >
-                            Prev
+                            ← Previous
                         </button>
                     )}
 
@@ -807,19 +856,20 @@ const AddPage = () => {
                             }}
                             disabled={submitting || stepChanging}
                         >
-                            Next
+                            Next Step →
                         </button>
                     ) : (
                         <button
                             type="submit"
                             style={{
-                                padding: '10px 20px', backgroundColor: accenturePurple,
+                                padding: '10px 20px', backgroundColor: '#28a745',
                                 color: '#fff', border: 'none', borderRadius: '5px',
-                                cursor: 'pointer', marginLeft: step === 1 ? 'auto' : ''
+                                cursor: 'pointer', marginLeft: step === 1 ? 'auto' : '',
+                                fontWeight: 'bold'
                             }}
                             disabled={submitting || stepChanging}
                         >
-                            {submitting ? 'Submitting...' : 'Submit'}
+                            {submitting ? 'Submitting...' : '✓ Submit Form'}
                         </button>
                     )}
                 </div>
