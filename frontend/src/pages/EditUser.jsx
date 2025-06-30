@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const accenturePurple = '#6a0dad';
 const API_BASE_URL = 'http://localhost:5000';
@@ -49,7 +50,8 @@ const transformDataForBackend = (frontendData) => {
 
 const EditUser = () => {
     const navigate = useNavigate();
-    const { emailId } = useParams(); // Get email ID from URL (without @accenture.com)
+    const { emailId } = useParams();
+    const { user } = useAuth();
     const [step, setStep] = useState(1);
     const [formData, setFormData] = useState(
         Object.keys(fieldLabels).reduce((acc, key) => ({ ...acc, [key]: '' }), {})
@@ -261,8 +263,17 @@ const EditUser = () => {
             }
             
             await axios.put(`${API_BASE_URL}/api/batchmates/${encodeURIComponent(nameToUpdate)}`, payload);
-            alert('Profile updated successfully! Click OK to return to the homepage.');
-            navigate('/');
+            alert('Profile updated successfully! Click OK to view your profile.');
+            
+            // Redirect to profile page based on user role
+            if (user && user.role === 'admin') {
+                navigate('/home');
+            } else if (user && user.email) {
+                const userEnterpriseId = user.email.split('@')[0];
+                navigate(`/profile/${userEnterpriseId}`);
+            } else {
+                navigate('/home');
+            }
         } catch (error) {
             let errorMessage = 'Failed to update profile. Please try again.';
             if (error.response) {
@@ -370,6 +381,7 @@ const EditUser = () => {
                     return;
                 }
             }
+            setSubmitStatus({ message: 'Step 1 completed! Moving to Skills section...', type: 'success' });
         } else if (step === 2) {
             const step2MandatoryKeys = ['overall_experience_years', 'overall_experience_months', 'primary_skill'];
             for (const fieldKey of step2MandatoryKeys) {
@@ -379,10 +391,14 @@ const EditUser = () => {
                     return;
                 }
             }
+            setSubmitStatus({ message: 'Step 2 completed! Moving to Additional Information section...', type: 'success' });
         }
-        console.log('Setting step to:', step + 1);
-        setStep((prev) => prev + 1);
-        setStepChanging(false);
+        
+        setTimeout(() => {
+            console.log('Setting step to:', step + 1);
+            setStep((prev) => prev + 1);
+            setStepChanging(false);
+        }, 1000);
     };
     const handlePrev = () => {
         console.log('handlePrev called, stepChanging:', stepChanging, 'step:', step);
@@ -594,6 +610,38 @@ const EditUser = () => {
                 </div>
             </div>
 
+            {/* Progress Indicator */}
+            <div style={{ 
+                marginBottom: '20px', 
+                padding: '10px', 
+                backgroundColor: '#f8f9fa', 
+                borderRadius: '5px',
+                border: '1px solid #dee2e6'
+            }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontWeight: 'bold', color: accenturePurple }}>
+                        Step {step} of 3: {step === 1 ? 'Basic Information' : step === 2 ? 'Skills & Experience' : 'Additional Information'}
+                    </span>
+                    <span style={{ color: '#6c757d' }}>
+                        {step === 3 ? 'Ready to update!' : `${Math.round((step / 3) * 100)}% Complete`}
+                    </span>
+                </div>
+                <div style={{ 
+                    marginTop: '8px', 
+                    height: '4px', 
+                    backgroundColor: '#e9ecef', 
+                    borderRadius: '2px',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{ 
+                        width: `${(step / 3) * 100}%`, 
+                        height: '100%', 
+                        backgroundColor: accenturePurple,
+                        transition: 'width 0.4s ease-in-out'
+                    }} />
+                </div>
+            </div>
+
             {/* Form Content */}
             <form onSubmit={handleSubmit} style={{
                 backgroundColor: '#fff', padding: '20px', borderRadius: '8px',
@@ -699,7 +747,7 @@ const EditUser = () => {
                             }}
                             disabled={submitting || stepChanging}
                         >
-                            Prev
+                            ← Previous
                         </button>
                     )}
 
@@ -714,19 +762,20 @@ const EditUser = () => {
                             }}
                             disabled={submitting || stepChanging}
                         >
-                            Next
+                            Next Step →
                         </button>
                     ) : (
                         <button
                             type="submit"
                             style={{
-                                padding: '10px 20px', backgroundColor: accenturePurple,
+                                padding: '10px 20px', backgroundColor: '#28a745',
                                 color: '#fff', border: 'none', borderRadius: '5px',
-                                cursor: 'pointer', marginLeft: step === 1 ? 'auto' : ''
+                                cursor: 'pointer', marginLeft: step === 1 ? 'auto' : '',
+                                fontWeight: 'bold'
                             }}
                             disabled={submitting || stepChanging}
                         >
-                            {submitting ? 'Updating...' : 'Update Profile'}
+                            {submitting ? 'Updating...' : '✓ Update Profile'}
                         </button>
                     )}
                 </div>
