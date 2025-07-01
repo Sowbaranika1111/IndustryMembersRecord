@@ -10,10 +10,11 @@ export default function Profile() {
     // Get the enterpriseId from the URL (e.g., 'john.doe' from '/profile/john.doe')
     const { enterpriseId } = useParams();
     const navigate = useNavigate();
-    const { user } = useAuth();
+    const { user, logout } = useAuth();
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [showLogoutModal, setShowLogoutModal] = useState(false);
 
     useEffect(() => {
         // This effect runs whenever the enterpriseId in the URL changes.
@@ -108,6 +109,74 @@ export default function Profile() {
     // Main JSX rendering using the fetched profileData
     return (
         <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
+            {/* Logout Confirmation Modal */}
+            {showLogoutModal && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: 'rgba(0,0,0,0.3)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000
+                }}>
+                    <div style={{
+                        background: 'white',
+                        padding: '32px 28px',
+                        borderRadius: '10px',
+                        boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+                        minWidth: '320px',
+                        textAlign: 'center',
+                        fontFamily: 'Segoe UI, sans-serif'
+                    }}>
+                        <div style={{ fontSize: '22px', fontWeight: 600, marginBottom: '12px', color: '#A100FF' }}>Confirm Logout</div>
+                        <div style={{ fontSize: '16px', marginBottom: '28px', color: '#333' }}>
+                            Are you sure you want to logout?
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '18px' }}>
+                            <button
+                                onClick={() => setShowLogoutModal(false)}
+                                style={{
+                                    padding: '8px 22px',
+                                    background: '#f0f0f0',
+                                    color: '#333',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    fontWeight: 500,
+                                    cursor: 'pointer',
+                                    fontSize: '15px',
+                                    transition: 'background 0.2s',
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    setShowLogoutModal(false);
+                                    await logout();
+                                    navigate('/');
+                                }}
+                                style={{
+                                    padding: '8px 22px',
+                                    background: '#A100FF',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '5px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    fontSize: '15px',
+                                    transition: 'background 0.2s',
+                                }}
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* Centered Avatar and Name Section */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '20px' }}>
                 <div style={{
@@ -122,7 +191,7 @@ export default function Profile() {
                 }}></div>
                 
                 {/* Name with Edit Icon */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '10px' }}>
                     <h2 style={{
                         margin: '0',
                         fontWeight: '700',
@@ -132,7 +201,6 @@ export default function Profile() {
                     }}>
                         {profileData.name || 'N/A'}
                     </h2>
-                    
                     {/* Edit Icon - only show if user can edit */}
                     {canEdit() && (
                         <button
@@ -146,7 +214,8 @@ export default function Profile() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                transition: 'background-color 0.3s ease'
+                                transition: 'background-color 0.3s ease',
+                                marginRight: '0px'
                             }}
                             onMouseEnter={(e) => {
                                 e.currentTarget.style.backgroundColor = '#f0f0f0';
@@ -168,6 +237,45 @@ export default function Profile() {
                             >
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                 <path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </button>
+                    )}
+                    {/* Logout Icon - only show if user is logged in */}
+                    {user && (
+                        <button
+                            onClick={() => setShowLogoutModal(true)}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '5px',
+                                borderRadius: '50%',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'background-color 0.3s ease',
+                            }}
+                            onMouseEnter={e => {
+                                e.currentTarget.style.backgroundColor = '#ffe6f0';
+                            }}
+                            onMouseLeave={e => {
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                            }}
+                            title="Logout"
+                        >
+                            <svg
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="#d32f2f"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                                <polyline points="16 17 21 12 16 7" />
+                                <line x1="21" y1="12" x2="9" y2="12" />
                             </svg>
                         </button>
                     )}

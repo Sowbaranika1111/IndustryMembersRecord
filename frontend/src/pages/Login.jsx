@@ -218,10 +218,10 @@ const Login = () => {
             <div className="login-page-container">
                 <div className="login-container">
                     <div className="login-header">
-                        <div className="logo-container">
+                        <div className="logo-container">    
                             <img src="/ACN.svg" alt="Logo" className="accenture-logo" />
                         </div>
-                        <h1>IX Engineering</h1>
+                        <h1>DU Skill Repository</h1>
                     </div>
 
                     {error && <p className="error-message">{error}</p>}
