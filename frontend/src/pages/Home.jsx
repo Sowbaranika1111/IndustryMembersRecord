@@ -12,7 +12,6 @@ export default function Home() {
 
   return (
     <div style={{ fontFamily: '"Segoe UI", sans-serif' }}>
-      <Navbar />
       
       {/* Header Section */}
       <div style={{
