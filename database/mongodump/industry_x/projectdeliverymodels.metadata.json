@@ -1,0 +1,1 @@
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"value":{"$numberInt":"1"}},"name":"value_1","background":true,"unique":true}],"uuid":"4953984f28aa440c9982cdb40f286aab","collectionName":"projectdeliverymodels","type":"collection"}
