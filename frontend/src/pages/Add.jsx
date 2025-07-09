@@ -474,9 +474,77 @@ const AddPage = () => {
             isApiDropdown = false;
         }
 
+        // Define required fields
+        const requiredFields = ['name', 'email_address', 'enterprise_id', 'management_level', 'work_location', 'project', 'job_profile', 'current_role', 'overall_experience_years', 'overall_experience_months', 'primary_skill'];
+        const isRequired = requiredFields.includes(name);
+
+        // Define placeholders for different field types
+        const getPlaceholder = (fieldName) => {
+            const placeholders = {
+                name: 'Enter your full name',
+                email_address: 'Enter your email address (e.g., john.doe@accenture.com)',
+                enterprise_id: 'Enter your enterprise ID (e.g., john.doe)',
+                management_level: 'Select your management level',
+                work_location: 'Select your work location',
+                project: 'Select your project',
+                job_profile: 'Select your designation',
+                current_role: 'Select your current role',
+                overall_experience_years: 'Select years of experience',
+                overall_experience_months: 'Select months of experience',
+                primary_skill: 'Enter your primary skill',
+                additional_skills: 'Enter additional skills (comma separated)',
+                agile_project: 'Select agile project experience',
+                plm_development: 'Select PLM development experience',
+                industry_knowledge: 'Select industry knowledge',
+                automation_skills: 'Enter automation skills',
+                devops_skills: 'Select DevOps skills',
+                cloud_knowledge: 'Select cloud knowledge',
+                sw_engineering: 'Select software engineering experience',
+                project_management: 'Enter project management experience',
+                plm_testing: 'Select PLM testing experience',
+                plm_support: 'Select PLM support experience',
+                plm_admin: 'Select PLM admin experience',
+                plm_upgrade: 'Select PLM upgrade experience',
+                plm_cad_integration: 'Select PLM CAD integration experience',
+                plm_interfaceintegration: 'Select PLM interface/integration experience',
+                plm_sap_integration: 'Select PLM SAP integration experience',
+                tc_manufacturing: 'Select TC manufacturing experience',
+                plmqms_integration: 'Select PLM-QMS integration experience',
+                plm_functional: 'Select PLM functional experience',
+                plm_migration: 'Select PLM migration experience',
+                plm_product_configurators: 'Select PLM product configurators experience',
+                active_workspace_customization: 'Select Active Workspace customization experience',
+                teamcenter_module_experience: 'Enter Teamcenter module experience',
+                external_certifications__completed_along_with_completion__expiry_date: 'Enter completed certifications with completion/expiry dates',
+                certifications_in_progress: 'Enter certifications in progress',
+                special_call_out: 'Enter any special call outs or achievements',
+                project_delivery_model: 'Select project delivery model',
+                project_delivery_years: 'Select years in project delivery model',
+                project_delivery_experience: 'Describe your experience in project delivery model',
+                plm_development_expertise: 'Select PLM development expertise',
+                plm_development_experience: 'Describe your PLM development experience',
+                plm_admin_expertise_dropdown: 'Select PLM admin expertise',
+                plm_admin_experience: 'Describe your PLM admin experience',
+                plm_cad_integration_expertise: 'Select PLM CAD integration expertise',
+                plm_cad_integration_experience: 'Describe your PLM CAD integration experience',
+                plm_upgrade_expertise: 'Select PLM upgrade expertise',
+                plm_upgrade_experience: 'Describe your PLM upgrade experience',
+                plm_testing_expertise: 'Select PLM testing expertise',
+                plm_testing_experience: 'Describe your PLM testing experience',
+                plm_support_expertise: 'Select PLM support expertise',
+                plm_support_experience: 'Describe your PLM support experience',
+                plm_integration_expertise: 'Select PLM integration expertise',
+                plm_integration_experience: 'Describe your PLM integration experience'
+            };
+            return placeholders[fieldName] || `Enter ${fieldLabels[fieldName]?.toLowerCase() || fieldName.replace(/_/g, ' ')}`;
+        };
+
         return (
             <div key={name} style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px' }}>{fieldLabels[name]}</label>
+                <label style={{ display: 'block', marginBottom: '5px' }}>
+                    {fieldLabels[name]}
+                    {isRequired && <span style={{ color: 'red', marginLeft: '2px' }}>*</span>}
+                </label>
                 {optionsToRender.length > 0 ? (
                     <select
                         name={name}
@@ -485,7 +553,7 @@ const AddPage = () => {
                         style={{ width: '99%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
                         disabled={submitting || stepChanging}
                     >
-                        <option value="">Select...</option>
+                        <option value="">{getPlaceholder(name)}</option>
                         {optionsToRender.map((opt, index) => {
                             let optionKey;
                             let optionValue;
@@ -517,6 +585,7 @@ const AddPage = () => {
                         name={name}
                         value={formData[name]}
                         onChange={handleChange}
+                        placeholder={getPlaceholder(name)}
                         style={{ width: '95%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
                         disabled={submitting || stepChanging}
                     />
@@ -528,7 +597,10 @@ const AddPage = () => {
     const renderOverallExperience = () => {
         return (
             <div style={{ marginBottom: '15px' }}>
-                <label style={{ display: 'block', marginBottom: '5px' }}>Overall Experience</label>
+                <label style={{ display: 'block', marginBottom: '5px' }}>
+                    Overall Experience
+                    <span style={{ color: 'red', marginLeft: '2px' }}>*</span>
+                </label>
                 <div style={{ display: 'flex', gap: '10px' }}>
                     <select
                         name="overall_experience_years"
@@ -537,7 +609,7 @@ const AddPage = () => {
                         style={{ flex: 1, padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
                         disabled={submitting || stepChanging}
                     >
-                        <option value="">Years</option>
+                        <option value="">Select years of experience</option>
                         {dropdownOptions.overall_experience_years.map((year) => (
                             <option key={year} value={year}>{year}</option>
                         ))}
@@ -549,7 +621,7 @@ const AddPage = () => {
                         style={{ flex: 1, padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
                         disabled={submitting || stepChanging}
                     >
-                        <option value="">Months</option>
+                        <option value="">Select months of experience</option>
                         {dropdownOptions.overall_experience_months.map((month) => (
                             <option key={month} value={month}>{month}</option>
                         ))}
@@ -610,7 +682,7 @@ const AddPage = () => {
                         style={{ width: '99%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
                         disabled={submitting || stepChanging}
                     >
-                        <option value="">Select...</option>
+                        <option value="">Select {expertiseLabel.toLowerCase()}</option>
                         {expertiseOptions.map((opt, idx) => (
                             <option key={opt._id || idx} value={opt.value}>{opt.value}</option>
                         ))}
@@ -623,6 +695,7 @@ const AddPage = () => {
                     name={experienceField}
                     value={formData[experienceField]}
                     onChange={handleChange}
+                    placeholder={`Describe your ${experienceLabel.toLowerCase()}`}
                     style={{ width: '95%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc', minHeight: '60px', resize: 'vertical' }}
                     disabled={submitting || stepChanging}
                 />
@@ -645,7 +718,7 @@ const AddPage = () => {
                     style={{ width: '99%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc' }}
                     disabled={submitting || stepChanging}
                 >
-                    <option value="">Select...</option>
+                    <option value="">Select years in project delivery model</option>
                     {dropdownOptions.project_delivery_years.map((year) => (
                         <option key={year} value={year}>{year}</option>
                     ))}
@@ -657,6 +730,7 @@ const AddPage = () => {
                     name="project_delivery_experience"
                     value={formData.project_delivery_experience}
                     onChange={handleChange}
+                    placeholder="Describe your experience in project delivery model"
                     style={{ width: '97%', padding: '10px', borderRadius: '5px', border: '1px solid #ccc', minHeight: '60px', resize: 'vertical' }}
                     disabled={submitting || stepChanging}
                 />
