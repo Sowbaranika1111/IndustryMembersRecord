@@ -116,6 +116,11 @@ app.use("/api/plm-integration-expertise",plmIntegrationExpertise);
 const plmSupportExpertise = require("./routes/plmSupportRoutes.js");
 app.use("/api/plm-support-expertise",plmSupportExpertise);
 
+
+//User disable 
+const userDisableRoute = require("./routes/userDisableRoutes");
+app.use("/api/user-disable", userDisableRoute);
+
 //! Login Admin Routes
 
 app.use('/api/login/',loginRoutes);
