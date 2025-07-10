@@ -437,12 +437,12 @@ const AddPage = () => {
             
             // Redirect to profile page based on user role
             if (user && user.role === 'admin') {
-                navigate('/home');
+                navigate('/');
             } else if (user && user.email) {
                 const userEnterpriseId = user.email.split('@')[0];
                 navigate(`/profile/${userEnterpriseId}`);
             } else {
-                navigate('/home');
+                navigate('/');
             }
         } catch (error) {
             let errorMessage = 'Failed to add batchmate. Please try again.';

@@ -116,6 +116,10 @@ app.use("/api/plm-integration-expertise",plmIntegrationExpertise);
 const plmSupportExpertise = require("./routes/plmSupportRoutes.js");
 app.use("/api/plm-support-expertise",plmSupportExpertise);
 
+//Download Profile
+const downloadProfile = require("./routes/downloadProfileRoutes.js");
+app.use("/api/profile",downloadProfile);
+
 
 //User disable 
 const userDisableRoute = require("./routes/userDisableRoutes");
