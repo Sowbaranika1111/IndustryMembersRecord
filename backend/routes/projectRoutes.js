@@ -3,7 +3,7 @@ const router = express.Router();
 
 const {
   getAllProjects,
-  addProject,
+  addSingleProject,
   updateProjectById,
   deleteProjectById,
   deleteAllProjects,
@@ -14,7 +14,7 @@ const {
 router.get("/", getAllProjects);
 
 // POST one project
-router.post("/add", addProject);
+router.post("/add-single", addSingleProject);
 
 // PUT update existing project
 router.put("/update/:id", updateProjectById);

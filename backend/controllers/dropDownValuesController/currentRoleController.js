@@ -125,45 +125,69 @@ const updateCurrentRole = async (req, res) => {
   }
 };
 
-//! DELETE a current role by ID - route removed - check the code 
-// http://localhost:5000/api/current-role-dropdown/delete/3 Delete
-exports.deleteCurrentRoleById = async (req, res) => {
+// ADD single current role value
+const addSingleCurrentRole = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
-
-    // Include existing values info if any
-    if (existingValues.length > 0) {
-      response.existingValues = existingMessages;
-      response.message += ` ${existingValues.length} values were already present in the database.`;
+    const { value } = req.body;
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Current role value is required." });
     }
-
-    res.status(201).json(response);
+    const trimmed = value.trim();
+    const exists = await CurrentRole.findOne({ value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
+    if (exists) {
+      return res.status(400).json({ success: false, message: `Current role \"${exists.value}\" already exists (case-insensitive match).` });
+    }
+    const newItem = new CurrentRole({ value: trimmed });
+    const saved = await newItem.save();
+    res.status(201).json({ success: true, message: "Current role added successfully.", data: saved });
   } catch (err) {
-    console.error("Error in insertAllCurrentRoles:", err);
-
-    // Handle specific MongoDB errors
+    console.error("Error in addSingleCurrentRole:", err);
     if (err.code === 11000) {
-      return res.status(409).json({
-        error: "Duplicate key error: One or more values already exist.",
-        success: false,
-      });
+      return res.status(400).json({ success: false, message: "Current role already exists." });
     }
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
 
-    // Handle validation errors
-    if (err.name === "ValidationError") {
-      return res.status(400).json({
-        error: `Validation error: ${err.message}`,
-        success: false,
-      });
+// UPDATE current role by ID
+const updateCurrentRoleById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { value } = req.body;
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Current role value is required." });
     }
+    const trimmed = value.trim();
+    const existing = await CurrentRole.findOne({ _id: { $ne: id }, value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
+    if (existing) {
+      return res.status(400).json({ success: false, message: `Current role \"${existing.value}\" already exists (case-insensitive match).` });
+    }
+    const updated = await CurrentRole.findByIdAndUpdate(id, { value: trimmed }, { new: true, runValidators: true });
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Current role not found." });
+    }
+    res.status(200).json({ success: true, message: "Current role updated successfully.", data: updated });
+  } catch (err) {
+    console.error("Error in updateCurrentRoleById:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "Current role already exists." });
+    }
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
 
-    // Generic error response
-    res.status(500).json({
-      error:
-        "Internal server error occurred while inserting current role values.",
-      success: false,
-      details: process.env.NODE_ENV === "development" ? err.message : undefined,
-    });
+// DELETE current role by ID
+const deleteCurrentRoleById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const deleted = await CurrentRole.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Current role not found." });
+    }
+    res.status(200).json({ success: true, message: "Current role deleted.", deleted });
+  } catch (err) {
+    console.error("Error in deleteCurrentRoleById:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
@@ -281,4 +305,7 @@ module.exports = {
   deleteAllCurrentRoles,
   insertAllCurrentRoles,
   updateCurrentRole,
+  addSingleCurrentRole,
+  updateCurrentRoleById,
+  deleteCurrentRoleById
 };

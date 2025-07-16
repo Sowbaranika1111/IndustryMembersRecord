@@ -206,8 +206,143 @@ const insertAllWorkLocations = async (req, res) => {
   }
 };
 
+// ADD single work location value - for dropdown management
+const addSingleWorkLocation = async (req, res) => {
+  try {
+    const { value } = req.body;
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Work location value is required." });
+    }
+
+    const trimmed = value.trim();
+
+    // Check if any case variation exists
+    const exists = await WorkLocation.findOne({
+      value: { $regex: new RegExp(`^${trimmed}$`, "i") }
+    });
+
+    if (exists) {
+      return res.status(400).json({ 
+        success: false,
+        message: `Work location "${exists.value}" already exists (case-insensitive match).`
+      });
+    }
+
+    // Create and save the new work location
+    const newItem = new WorkLocation({ value: trimmed });
+    const saved = await newItem.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Work location added successfully.",
+      data: saved
+    });
+  } catch (err) {
+    console.error("Error in addSingleWorkLocation:", err);
+    
+    // Handle MongoDB duplicate key error (E11000)
+    if (err.code === 11000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Work location already exists." 
+      });
+    }
+    
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// UPDATE existing work location value (with case-insensitive duplicate check)
+const updateWorkLocationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { value } = req.body;
+
+    // Validate input
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Work location value is required." });
+    }
+
+    const trimmed = value.trim();
+
+    // Check if the new value (case-insensitive) exists for another document
+    const existing = await WorkLocation.findOne({
+      _id: { $ne: id }, // Exclude current document
+      value: { $regex: new RegExp(`^${trimmed}$`, "i") }
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: `Work location "${existing.value}" already exists (case-insensitive match).`
+      });
+    }
+
+    // Update the document
+    const updated = await WorkLocation.findByIdAndUpdate(
+      id,
+      { value: trimmed },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ 
+        success: false,
+        message: "Work location not found." 
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Work location updated successfully.",
+      data: updated
+    });
+  } catch (err) {
+    console.error("Error in updateWorkLocationById:", err);
+    
+    // Handle MongoDB duplicate key error (E11000)
+    if (err.code === 11000) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Work location already exists." 
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      error: "Internal Server Error" 
+    });
+  }
+};
+
+// DELETE work location by ID
+const deleteWorkLocationById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const deleted = await WorkLocation.findByIdAndDelete(id);
+
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Work location not found." });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Work location deleted.",
+      deleted
+    });
+  } catch (err) {
+    console.error("Error in deleteWorkLocationById:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
 
 
 module.exports = {
-  updateWorkLocation,getAllWorkLocations,deleteAllWorkLocations,insertAllWorkLocations,
+  updateWorkLocation,
+  getAllWorkLocations,
+  deleteAllWorkLocations,
+  insertAllWorkLocations,
+  addSingleWorkLocation,      // NEW: Add single work location
+  updateWorkLocationById,     // NEW: Update work location by ID
+  deleteWorkLocationById      // NEW: Delete work location by ID
 };

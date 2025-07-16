@@ -13,19 +13,22 @@ const {
 // GET all PLM testing expertise entries
 router.get("/", getAllPLMTestingExpertise);
 
-// POST one PLM testing expertise
-router.post("/add", addPLMTestingExpertise);
+// ADD single PLM testing expertise
+router.post("/add-single", addPLMTestingExpertise);
 
-// PUT update existing PLM testing expertise
+// Legacy add route
+// router.post("/add", addPLMTestingExpertise);
+
+// UPDATE PLM testing expertise by ID
 router.put("/update/:id", updatePLMTestingExpertiseById);
 
-// DELETE one PLM testing expertise by ID
+// DELETE PLM testing expertise by ID
 router.delete("/delete/:id", deletePLMTestingExpertiseById);
 
 // DELETE all PLM testing expertise entries
 router.delete("/delete-all", deleteAllPLMTestingExpertise);
 
-// POST multiple PLM testing expertise values
+// BULK INSERT PLM testing expertise values
 router.post("/insert-many", bulkInsertPLMTestingExpertise);
 
 module.exports = router;

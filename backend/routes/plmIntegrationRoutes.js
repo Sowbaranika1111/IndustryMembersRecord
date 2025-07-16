@@ -3,6 +3,7 @@ const router = express.Router();
 
 const {
   getAllPLMIntegrationExpertise,
+  addSinglePLMIntegrationExpertise,
   addPLMIntegrationExpertise,
   updatePLMIntegrationExpertiseById,
   deletePLMIntegrationExpertiseById,
@@ -13,19 +14,22 @@ const {
 // GET all PLM integration expertise entries
 router.get("/", getAllPLMIntegrationExpertise);
 
-// POST one PLM integration expertise
+// ADD single PLM integration expertise
+router.post("/add-single", addSinglePLMIntegrationExpertise);
+
+// Legacy route (backward compatibility)
 router.post("/add", addPLMIntegrationExpertise);
 
-// PUT update existing PLM integration expertise
+// UPDATE PLM integration expertise by ID
 router.put("/update/:id", updatePLMIntegrationExpertiseById);
 
-// DELETE one PLM integration expertise by ID
+// DELETE PLM integration expertise by ID
 router.delete("/delete/:id", deletePLMIntegrationExpertiseById);
 
 // DELETE all PLM integration expertise entries
 router.delete("/delete-all", deleteAllPLMIntegrationExpertise);
 
-// POST multiple PLM integration expertise values
+// BULK INSERT PLM integration expertise values
 router.post("/insert-many", bulkInsertPLMIntegrationExpertise);
 
 module.exports = router;

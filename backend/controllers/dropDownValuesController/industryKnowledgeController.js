@@ -268,3 +268,39 @@ exports.insertAllIndustryKnowledge = async (req, res) => {
     });
   }
 };
+
+// UPDATE industry knowledge by ID
+exports.updateIndustryKnowledgeById = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { value } = req.body;
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Industry knowledge value is required." });
+    }
+    const trimmed = value.trim();
+    // Check for duplicate (case-insensitive, excluding current id)
+    const duplicate = await IndustryKnowledge.findOne({
+      id: { $ne: id },
+      category: "industry_knowledge",
+      value: { $regex: new RegExp(`^${trimmed}$`, "i") }
+    });
+    if (duplicate) {
+      return res.status(400).json({
+        success: false,
+        message: `Industry knowledge \"${duplicate.value}\" already exists (case-insensitive match).`
+      });
+    }
+    const updated = await IndustryKnowledge.findOneAndUpdate(
+      { id, category: "industry_knowledge" },
+      { value: trimmed },
+      { new: true, runValidators: true }
+    );
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Industry knowledge not found." });
+    }
+    res.status(200).json({ success: true, message: "Industry knowledge updated successfully.", data: updated });
+  } catch (err) {
+    console.error("Error in updateIndustryKnowledgeById:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};

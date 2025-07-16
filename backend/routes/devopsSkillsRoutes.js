@@ -3,7 +3,7 @@ const router = express.Router();
 
 const {
   getAllDevOpsSkills,
-  addDevOpsSkill,
+  addSingleDevOpsSkill,
   updateDevOpsSkillById,
   deleteDevOpsSkillById,
   deleteAllDevOpsSkills,
@@ -13,19 +13,19 @@ const {
 // GET all devops skills
 router.get("/", getAllDevOpsSkills);
 
-// POST one devops skill
-router.post("/add", addDevOpsSkill);
+// ADD single devops skill
+router.post("/add-single", addSingleDevOpsSkill);
 
-// PUT update existing devops skill
+// UPDATE devops skill by ID
 router.put("/update/:id", updateDevOpsSkillById);
 
-// DELETE one devops skill by ID
+// DELETE devops skill by ID
 router.delete("/delete/:id", deleteDevOpsSkillById);
 
 // DELETE all devops skills
 router.delete("/delete-all", deleteAllDevOpsSkills);
 
-// POST multiple devops skills
+// BULK INSERT devops skills
 router.post("/insert-many", bulkInsertDevOpsSkills);
 
 module.exports = router;

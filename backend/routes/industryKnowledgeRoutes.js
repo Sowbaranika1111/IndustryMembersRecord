@@ -9,6 +9,9 @@ router.get("/", industryKnowledgeController.getIndustryKnowledgeValues);
 // POST a new industry knowledge value
 router.post("/add", industryKnowledgeController.addNewIndustryKnowledge);
 
+// UPDATE a value by ID
+router.put("/update/:id", industryKnowledgeController.updateIndustryKnowledgeById);
+
 // DELETE a value by ID
 router.delete("/delete/:id", industryKnowledgeController.deleteIndustryKnowledgeById);
 

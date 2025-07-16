@@ -3,8 +3,8 @@ const { ProjectDeliveryModels } = require("../../models/dropdownValuesModel");
 //! get all
 const getAllProjectDeliveryModels = async (req, res) => {
   try {
-    const models = await ProjectDeliveryModels.find({});
-    res.status(200).json(models);
+    const models = await ProjectDeliveryModels.find({}).sort({ value: 1 });
+    res.status(200).json({ success: true, count: models.length, data: models });
   } catch (err) {
     console.error("Error fetching project delivery models:", err);
     res.status(500).json({
@@ -187,8 +187,77 @@ const deleteAllProjectDeliveryModels = async (req, res) => {
   }
 };
 
+// ADD single
+const addSingleProjectDeliveryModel = async (req, res) => {
+  try {
+    const { value } = req.body;
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Project delivery model value is required." });
+    }
+    const trimmed = value.trim();
+    const exists = await ProjectDeliveryModels.findOne({ value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
+    if (exists) {
+      return res.status(400).json({ success: false, message: `Project delivery model \"${exists.value}\" already exists (case-insensitive match).` });
+    }
+    const newItem = new ProjectDeliveryModels({ value: trimmed });
+    const saved = await newItem.save();
+    res.status(201).json({ success: true, message: "Project delivery model added successfully.", data: saved });
+  } catch (err) {
+    console.error("Error in addSingleProjectDeliveryModel:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "Project delivery model already exists." });
+    }
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// UPDATE by ID
+const updateProjectDeliveryModelById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { value } = req.body;
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Project delivery model value is required." });
+    }
+    const trimmed = value.trim();
+    const existing = await ProjectDeliveryModels.findOne({ _id: { $ne: id }, value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
+    if (existing) {
+      return res.status(400).json({ success: false, message: `Project delivery model \"${existing.value}\" already exists (case-insensitive match).` });
+    }
+    const updated = await ProjectDeliveryModels.findByIdAndUpdate(id, { value: trimmed }, { new: true, runValidators: true });
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Project delivery model not found." });
+    }
+    res.status(200).json({ success: true, message: "Project delivery model updated successfully.", data: updated });
+  } catch (err) {
+    console.error("Error in updateProjectDeliveryModelById:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "Project delivery model already exists." });
+    }
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// DELETE by ID
+const deleteProjectDeliveryModelById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const deleted = await ProjectDeliveryModels.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Project delivery model not found." });
+    }
+    res.status(200).json({ success: true, message: "Project delivery model deleted.", deleted });
+  } catch (err) {
+    console.error("Error in deleteProjectDeliveryModelById:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   getAllProjectDeliveryModels,
+  addSingleProjectDeliveryModel,
+  updateProjectDeliveryModelById,
+  deleteProjectDeliveryModelById,
   updateProjectDeliveryModels,
   insertAllProjectDeliveryModels,
   deleteAllProjectDeliveryModels,

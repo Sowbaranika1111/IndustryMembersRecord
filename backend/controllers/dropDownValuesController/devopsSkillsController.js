@@ -16,100 +16,98 @@ const getAllDevOpsSkills = async (req, res) => {
 };
 
 // POST one skill (with case-insensitive check)
-const addDevOpsSkill = async (req, res) => {
+// const addDevOpsSkill = async (req, res) => {
+//   try {
+//     const { value } = req.body;
+//     if (!value || typeof value !== "string" || value.trim() === "") {
+//       return res.status(400).json({ error: "DevOps skill value is required." });
+//     }
+
+//     const trimmed = value.trim();
+//     const exists = await DevopsSkill.findOne({
+//       value: { $regex: new RegExp(`^${trimmed}$`, "i") }
+//     });
+
+//     if (exists) {
+//       return res.status(400).json({ 
+//         success: false,
+//         message: `DevOps skill "${exists.value}" already exists (case-insensitive match).`
+//       });
+//     }
+
+//     const newItem = new DevopsSkill({ value: trimmed });
+//     const saved = await newItem.save();
+//     res.status(201).json({
+//       success: true,
+//       message: "DevOps skill added.",
+//       data: saved
+//     });
+//   } catch (err) {
+//     console.error("Error in addDevOpsSkill:", err);
+//     res.status(500).json({ success: false, error: "Internal Server Error" });
+//   }
+// };
+
+// ADD single devops skill value
+const addSingleDevOpsSkill = async (req, res) => {
   try {
     const { value } = req.body;
     if (!value || typeof value !== "string" || value.trim() === "") {
       return res.status(400).json({ error: "DevOps skill value is required." });
     }
-
     const trimmed = value.trim();
-    const exists = await DevopsSkill.findOne({
-      value: { $regex: new RegExp(`^${trimmed}$`, "i") }
-    });
-
+    const exists = await DevopsSkill.findOne({ value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
     if (exists) {
-      return res.status(400).json({ 
-        success: false,
-        message: `DevOps skill "${exists.value}" already exists (case-insensitive match).`
-      });
+      return res.status(400).json({ success: false, message: `DevOps skill \"${exists.value}\" already exists (case-insensitive match).` });
     }
-
     const newItem = new DevopsSkill({ value: trimmed });
     const saved = await newItem.save();
-    res.status(201).json({
-      success: true,
-      message: "DevOps skill added.",
-      data: saved
-    });
+    res.status(201).json({ success: true, message: "DevOps skill added successfully.", data: saved });
   } catch (err) {
-    console.error("Error in addDevOpsSkill:", err);
+    console.error("Error in addSingleDevOpsSkill:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "DevOps skill already exists." });
+    }
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
-// UPDATE existing skill (with case-insensitive check)
+// UPDATE devops skill by ID
 const updateDevOpsSkillById = async (req, res) => {
   try {
     const { id } = req.params;
     const { value } = req.body;
-
     if (!value || typeof value !== "string" || value.trim() === "") {
       return res.status(400).json({ error: "DevOps skill value is required." });
     }
-
     const trimmed = value.trim();
-    const existing = await DevopsSkill.findOne({
-      _id: { $ne: id },
-      value: { $regex: new RegExp(`^${trimmed}$`, "i") }
-    });
-
+    const existing = await DevopsSkill.findOne({ _id: { $ne: id }, value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
     if (existing) {
-      return res.status(400).json({
-        success: false,
-        message: `DevOps skill "${existing.value}" already exists (case-insensitive match).`
-      });
+      return res.status(400).json({ success: false, message: `DevOps skill \"${existing.value}\" already exists (case-insensitive match).` });
     }
-
-    const updated = await DevopsSkill.findByIdAndUpdate(
-      id,
-      { value: trimmed },
-      { new: true, runValidators: true }
-    );
-
+    const updated = await DevopsSkill.findByIdAndUpdate(id, { value: trimmed }, { new: true, runValidators: true });
     if (!updated) {
-      return res.status(404).json({ 
-        success: false,
-        message: "Entry not found." 
-      });
+      return res.status(404).json({ success: false, message: "DevOps skill not found." });
     }
-
-    res.status(200).json({
-      success: true,
-      message: "DevOps skill updated.",
-      data: updated
-    });
+    res.status(200).json({ success: true, message: "DevOps skill updated successfully.", data: updated });
   } catch (err) {
     console.error("Error in updateDevOpsSkillById:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "DevOps skill already exists." });
+    }
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
-// DELETE by ID
+// DELETE devops skill by ID
 const deleteDevOpsSkillById = async (req, res) => {
   try {
     const id = req.params.id;
     const deleted = await DevopsSkill.findByIdAndDelete(id);
-
     if (!deleted) {
-      return res.status(404).json({ success: false, message: "Entry not found." });
+      return res.status(404).json({ success: false, message: "DevOps skill not found." });
     }
-
-    res.status(200).json({
-      success: true,
-      message: "DevOps skill deleted.",
-      deleted
-    });
+    res.status(200).json({ success: true, message: "DevOps skill deleted.", deleted });
   } catch (err) {
     console.error("Error in deleteDevOpsSkillById:", err);
     res.status(500).json({ success: false, error: "Internal Server Error" });
@@ -211,9 +209,12 @@ const bulkInsertDevOpsSkills = async (req, res) => {
 
 module.exports = {
   getAllDevOpsSkills,
-  addDevOpsSkill,
   updateDevOpsSkillById,
   deleteDevOpsSkillById,
   deleteAllDevOpsSkills,
-  bulkInsertDevOpsSkills
+  bulkInsertDevOpsSkills,
+  //admin
+  addSingleDevOpsSkill,
+  updateDevOpsSkillById,
+  deleteDevOpsSkillById
 };

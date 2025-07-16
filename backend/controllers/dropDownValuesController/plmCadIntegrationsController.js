@@ -1,19 +1,90 @@
 const { PLMCADintegrations } = require("../../models/dropdownValuesModel.js");
 
-//! Get all PLM CAD integrations
+// GET all PLM CAD integrations
 const getAllPlmCadIntegrations = async (req, res) => {
   try {
-    const items = await PLMCADintegrations.find({});
-    res.status(200).json(items);
+    const items = await PLMCADintegrations.find().sort({ value: 1 });
+    res.status(200).json({
+      success: true,
+      count: items.length,
+      data: items
+    });
   } catch (error) {
     console.error("Error fetching PLM CAD integrations:", error);
-    res
-      .status(500)
-      .json({ message: "Server error while fetching PLM CAD integrations" });
+    res.status(500).json({ 
+      success: false,
+      message: "Server error while fetching PLM CAD integrations" 
+    });
   }
 };
 
-//! Add or update a PLM CAD integration
+// ADD single PLM CAD integration
+const addSinglePlmCadIntegration = async (req, res) => {
+  try {
+    const { value } = req.body;
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "PLM CAD integration value is required." });
+    }
+    const trimmed = value.trim();
+    const exists = await PLMCADintegrations.findOne({ value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
+    if (exists) {
+      return res.status(400).json({ success: false, message: `PLM CAD integration "${exists.value}" already exists (case-insensitive match).` });
+    }
+    const newItem = new PLMCADintegrations({ value: trimmed });
+    const saved = await newItem.save();
+    res.status(201).json({ success: true, message: "PLM CAD integration added successfully.", data: saved });
+  } catch (err) {
+    console.error("Error in addSinglePlmCadIntegration:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "PLM CAD integration already exists." });
+    }
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// UPDATE PLM CAD integration by ID
+const updatePlmCadIntegrationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { value } = req.body;
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "PLM CAD integration value is required." });
+    }
+    const trimmed = value.trim();
+    const existing = await PLMCADintegrations.findOne({ _id: { $ne: id }, value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
+    if (existing) {
+      return res.status(400).json({ success: false, message: `PLM CAD integration "${existing.value}" already exists (case-insensitive match).` });
+    }
+    const updated = await PLMCADintegrations.findByIdAndUpdate(id, { value: trimmed }, { new: true, runValidators: true });
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "PLM CAD integration not found." });
+    }
+    res.status(200).json({ success: true, message: "PLM CAD integration updated successfully.", data: updated });
+  } catch (err) {
+    console.error("Error in updatePlmCadIntegrationById:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "PLM CAD integration already exists." });
+    }
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// DELETE PLM CAD integration by ID
+const deletePlmCadIntegrationById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const deleted = await PLMCADintegrations.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "PLM CAD integration not found." });
+    }
+    res.status(200).json({ success: true, message: "PLM CAD integration deleted.", deleted });
+  } catch (err) {
+    console.error("Error in deletePlmCadIntegrationById:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// Add or update a PLM CAD integration (keeping existing function for backward compatibility)
 const updatePlmCadIntegration = async (req, res) => {
   try {
     const { value } = req.body;
@@ -98,7 +169,7 @@ const updatePlmCadIntegration = async (req, res) => {
   }
 };
 
-//! Delete all PLM CAD integrations
+// DELETE all PLM CAD integrations
 const deleteAllPlmCadIntegrations = async (req, res) => {
   try {
     const result = await PLMCADintegrations.deleteMany({});
@@ -124,7 +195,7 @@ const deleteAllPlmCadIntegrations = async (req, res) => {
   }
 };
 
-//! Insert multiple PLM CAD integrations
+// BULK INSERT PLM CAD integrations
 const insertAllPlmCadIntegrations = async (req, res) => {
   try {
     const inputArray = req.body; // directly expect ["value1", "value2", ...]
@@ -187,6 +258,9 @@ const insertAllPlmCadIntegrations = async (req, res) => {
 
 module.exports = {
   getAllPlmCadIntegrations,
+  addSinglePlmCadIntegration,
+  updatePlmCadIntegrationById,
+  deletePlmCadIntegrationById,
   updatePlmCadIntegration,
   deleteAllPlmCadIntegrations,
   insertAllPlmCadIntegrations,

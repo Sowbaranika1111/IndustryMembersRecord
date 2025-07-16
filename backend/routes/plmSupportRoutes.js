@@ -13,19 +13,22 @@ const {
 // GET all PLM support expertise entries
 router.get("/", getAllPLMSupportExpertise);
 
-// POST one PLM support expertise
-router.post("/add", addPLMSupportExpertise);
+// ADD single PLM support expertise
+router.post("/add-single", addPLMSupportExpertise);
 
-// PUT update existing PLM support expertise
+// Legacy add route
+// router.post("/add", addPLMSupportExpertise);
+
+// UPDATE PLM support expertise by ID
 router.put("/update/:id", updatePLMSupportExpertise);
 
-// DELETE one PLM support expertise by ID
+// DELETE PLM support expertise by ID
 router.delete("/delete/:id", deletePLMSupportExpertise);
 
 // DELETE all PLM support expertise entries
 router.delete("/delete-all", deleteAllPLMSupportExpertise);
 
-// POST multiple PLM support expertise values
+// BULK INSERT PLM support expertise values
 router.post("/insert-many", bulkInsertPLMSupportExpertise);
 
 module.exports = router;
