@@ -213,6 +213,75 @@ const insertAllDesignations = async (req, res) => {
   }
 };
 
+// ADD single designation value
+const addSingleDesignation = async (req, res) => {
+  try {
+    const { value } = req.body;
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Designation value is required." });
+    }
+    const trimmed = value.trim();
+    const exists = await Designation.findOne({ value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
+    if (exists) {
+      return res.status(400).json({ success: false, message: `Designation \"${exists.value}\" already exists (case-insensitive match).` });
+    }
+    const newItem = new Designation({ value: trimmed });
+    const saved = await newItem.save();
+    res.status(201).json({ success: true, message: "Designation added successfully.", data: saved });
+  } catch (err) {
+    console.error("Error in addSingleDesignation:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "Designation already exists." });
+    }
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// UPDATE designation by ID
+const updateDesignationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { value } = req.body;
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Designation value is required." });
+    }
+    const trimmed = value.trim();
+    const existing = await Designation.findOne({ _id: { $ne: id }, value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
+    if (existing) {
+      return res.status(400).json({ success: false, message: `Designation \"${existing.value}\" already exists (case-insensitive match).` });
+    }
+    const updated = await Designation.findByIdAndUpdate(id, { value: trimmed }, { new: true, runValidators: true });
+    if (!updated) {
+      return res.status(404).json({ success: false, message: "Designation not found." });
+    }
+    res.status(200).json({ success: true, message: "Designation updated successfully.", data: updated });
+  } catch (err) {
+    console.error("Error in updateDesignationById:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "Designation already exists." });
+    }
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// DELETE designation by ID
+const deleteDesignationById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const deleted = await Designation.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Designation not found." });
+    }
+    res.status(200).json({ success: true, message: "Designation deleted.", deleted });
+  } catch (err) {
+    console.error("Error in deleteDesignationById:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   updateDesignation,getAllDesignations,deleteAllDesignations,insertAllDesignations,
+  addSingleDesignation,
+  updateDesignationById,
+  deleteDesignationById
 };

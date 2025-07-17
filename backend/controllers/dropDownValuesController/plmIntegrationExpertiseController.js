@@ -15,6 +15,30 @@ const getAllPLMIntegrationExpertise = async (req, res) => {
   }
 };
 
+// ADD single PLM integration expertise
+const addSinglePLMIntegrationExpertise = async (req, res) => {
+  try {
+    const { value } = req.body;
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "PLM integration expertise value is required." });
+    }
+    const trimmed = value.trim();
+    const exists = await PLMIntegrationExpertise.findOne({ value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
+    if (exists) {
+      return res.status(400).json({ success: false, message: `PLM integration expertise "${exists.value}" already exists (case-insensitive match).` });
+    }
+    const newItem = new PLMIntegrationExpertise({ value: trimmed });
+    const saved = await newItem.save();
+    res.status(201).json({ success: true, message: "PLM integration expertise added successfully.", data: saved });
+  } catch (err) {
+    console.error("Error in addSinglePLMIntegrationExpertise:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "PLM integration expertise already exists." });
+    }
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
 // POST one PLM integration expertise (with case-insensitive check)
 const addPLMIntegrationExpertise = async (req, res) => {
   try {
@@ -211,6 +235,7 @@ const bulkInsertPLMIntegrationExpertise = async (req, res) => {
 
 module.exports = {
   getAllPLMIntegrationExpertise,
+  addSinglePLMIntegrationExpertise,
   addPLMIntegrationExpertise,
   updatePLMIntegrationExpertiseById,
   deletePLMIntegrationExpertiseById,

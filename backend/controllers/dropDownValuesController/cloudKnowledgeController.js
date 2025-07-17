@@ -54,25 +54,25 @@ const addCloudKnowledge = async (req, res) => {
 };
 
 // DELETE by ID
-const deleteCloudKnowledgeById = async (req, res) => {
-  try {
-    const id = req.params.id;
-    const deleted = await CloudKnowledge.findByIdAndDelete(id);
+// const deleteCloudKnowledgeById = async (req, res) => {
+//   try {
+//     const id = req.params.id;
+//     const deleted = await CloudKnowledge.findByIdAndDelete(id);
 
-    if (!deleted) {
-      return res.status(404).json({ success: false, message: "Entry not found." });
-    }
+//     if (!deleted) {
+//       return res.status(404).json({ success: false, message: "Entry not found." });
+//     }
 
-    res.status(200).json({
-      success: true,
-      message: "Cloud knowledge deleted.",
-      deleted
-    });
-  } catch (err) {
-    console.error("Error in deleteCloudKnowledgeById:", err);
-    res.status(500).json({ success: false, error: "Internal Server Error" });
-  }
-};
+//     res.status(200).json({
+//       success: true,
+//       message: "Cloud knowledge deleted.",
+//       deleted
+//     });
+//   } catch (err) {
+//     console.error("Error in deleteCloudKnowledgeById:", err);
+//     res.status(500).json({ success: false, error: "Internal Server Error" });
+//   }
+// };
 
 // DELETE all
 const deleteAllCloudKnowledge = async (req, res) => {
@@ -173,57 +173,69 @@ const bulkInsertCloudKnowledge = async (req, res) => {
   }
 };
 
-// UPDATE existing value (with case-insensitive duplicate check)
+// ADD single cloud knowledge value
+const addSingleCloudKnowledge = async (req, res) => {
+  try {
+    const { value } = req.body;
+    if (!value || typeof value !== "string" || value.trim() === "") {
+      return res.status(400).json({ error: "Cloud knowledge value is required." });
+    }
+    const trimmed = value.trim();
+    const exists = await CloudKnowledge.findOne({ value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
+    if (exists) {
+      return res.status(400).json({ success: false, message: `Cloud knowledge \"${exists.value}\" already exists (case-insensitive match).` });
+    }
+    const newItem = new CloudKnowledge({ value: trimmed });
+    const saved = await newItem.save();
+    res.status(201).json({ success: true, message: "Cloud knowledge added successfully.", data: saved });
+  } catch (err) {
+    console.error("Error in addSingleCloudKnowledge:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "Cloud knowledge already exists." });
+    }
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// UPDATE cloud knowledge by ID
 const updateCloudKnowledgeById = async (req, res) => {
   try {
     const { id } = req.params;
     const { value } = req.body;
-
-    // Validate input
     if (!value || typeof value !== "string" || value.trim() === "") {
-      return res.status(400).json({ error: "Cloud value is required." });
+      return res.status(400).json({ error: "Cloud knowledge value is required." });
     }
-
     const trimmed = value.trim();
-
-    // Check if the new value (case-insensitive) exists for another document
-    const existing = await CloudKnowledge.findOne({
-      _id: { $ne: id }, // Exclude current document
-      value: { $regex: new RegExp(`^${trimmed}$`, "i") }
-    });
-
+    const existing = await CloudKnowledge.findOne({ _id: { $ne: id }, value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
     if (existing) {
-      return res.status(400).json({
-        success: false,
-        message: `Cloud knowledge "${existing.value}" already exists (case-insensitive match).`
-      });
+      return res.status(400).json({ success: false, message: `Cloud knowledge \"${existing.value}\" already exists (case-insensitive match).` });
     }
-
-    // Update the document
-    const updated = await CloudKnowledge.findByIdAndUpdate(
-      id,
-      { value: trimmed },
-      { new: true, runValidators: true }
-    );
-
+    const updated = await CloudKnowledge.findByIdAndUpdate(id, { value: trimmed }, { new: true, runValidators: true });
     if (!updated) {
-      return res.status(404).json({ 
-        success: false,
-        message: "Entry not found." 
-      });
+      return res.status(404).json({ success: false, message: "Cloud knowledge not found." });
     }
-
-    res.status(200).json({
-      success: true,
-      message: "Cloud knowledge updated.",
-      data: updated
-    });
+    res.status(200).json({ success: true, message: "Cloud knowledge updated successfully.", data: updated });
   } catch (err) {
     console.error("Error in updateCloudKnowledgeById:", err);
-    res.status(500).json({ 
-      success: false, 
-      error: "Internal Server Error" 
-    });
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "Cloud knowledge already exists." });
+    }
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// DELETE cloud knowledge by ID
+const deleteCloudKnowledgeById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const deleted = await CloudKnowledge.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, message: "Cloud knowledge not found." });
+    }
+    res.status(200).json({ success: true, message: "Cloud knowledge deleted.", deleted });
+  } catch (err) {
+    console.error("Error in deleteCloudKnowledgeById:", err);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
@@ -234,5 +246,10 @@ module.exports = {
   updateCloudKnowledgeById,  // <-- Add this new function
   deleteCloudKnowledgeById,
   deleteAllCloudKnowledge,
-  bulkInsertCloudKnowledge
+  bulkInsertCloudKnowledge,
+  //Admin
+  addSingleCloudKnowledge,
+  updateCloudKnowledgeById,
+  deleteCloudKnowledgeById
+
 };

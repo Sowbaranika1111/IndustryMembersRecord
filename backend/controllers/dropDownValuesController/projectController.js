@@ -15,35 +15,27 @@ const getAllProjects = async (req, res) => {
   }
 };
 
-// POST one project (with case-insensitive check)
-const addProject = async (req, res) => {
+
+// ADD single project
+const addSingleProject = async (req, res) => {
   try {
     const { value } = req.body;
     if (!value || typeof value !== "string" || value.trim() === "") {
       return res.status(400).json({ error: "Project value is required." });
     }
-
     const trimmed = value.trim();
-    const exists = await Project.findOne({
-      value: { $regex: new RegExp(`^${trimmed}$`, "i") }
-    });
-
+    const exists = await Project.findOne({ value: { $regex: new RegExp(`^${trimmed}$`, "i") } });
     if (exists) {
-      return res.status(400).json({ 
-        success: false,
-        message: `Project "${exists.value}" already exists (case-insensitive match).`
-      });
+      return res.status(400).json({ success: false, message: `Project \"${exists.value}\" already exists (case-insensitive match).` });
     }
-
     const newItem = new Project({ value: trimmed });
     const saved = await newItem.save();
-    res.status(201).json({
-      success: true,
-      message: "Project added.",
-      data: saved
-    });
+    res.status(201).json({ success: true, message: "Project added successfully.", data: saved });
   } catch (err) {
-    console.error("Error in addProject:", err);
+    console.error("Error in addSingleProject:", err);
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: "Project already exists." });
+    }
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
@@ -211,7 +203,8 @@ const bulkInsertProjects = async (req, res) => {
 
 module.exports = {
   getAllProjects,
-  addProject,
+  
+  addSingleProject,
   updateProjectById,
   deleteProjectById,
   deleteAllProjects,
